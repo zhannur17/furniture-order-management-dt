@@ -23,7 +23,58 @@ Despite significant advancements in manufacturing technology, there still exist 
 
 The review focuses on five interconnected areas: customer order management and mass customization; ETO/MTO and order fulfilment; product configuration and customer interaction; ERP/MES and data integration; and production planning, intelligent scheduling, and smart manufacturing in furniture production.
 
-## 2. Customer Order Management and Mass Customization
+## 2. Structured Analysis of Publications
+
+The review is organised around the structured analysis table below (Table 1), which covers all 20 selected publications, followed by a synthesis table (Table 2). The critical discussion in Sections 3–8 builds on these tables. Detailed per-article analyses are provided in two companion documents, one per author:
+
+- [03a-original-research-articles.md](03a-original-research-articles.md): the 10 original research studies (Zhannur Meirambek).
+- [03b-review-articles.md](03b-review-articles.md): the 10 review articles (Ayazhan Orynbasar).
+
+### 2.1 Source selection and inclusion criteria
+
+- 20 sources, all peer-reviewed journal articles: 10 original studies and 10 review papers.
+- 18 of 20 were published in 2022–2025; two reviews from 2021 (Cannas and Gosling; Serrano-Ruiz et al.) are retained as essential background on engineer-to-order research and smart scheduling.
+- Search sources: Scopus, Web of Science, Google Scholar. Inclusion criteria: peer-reviewed journal article, English, addressing order management, configuration, system integration, digital twins or scheduling, or furniture manufacturing.
+
+### 2.2 Table 1. Analysis of the 20 publications
+
+| # | Source | Type | Problem / scope | Method | Key findings | Limitations | Use in this project |
+|---|---|---|---|---|---|---|---|
+| 1 | Thun, Bakås and Storholmen (2022), *AI & Society* 37(2) | Original, qualitative case study | How digitalization is developed and implemented in an engineer-to-order (ETO) manufacturer | 15 semi-structured interviews; socio-technical perspective; thematic analysis | Four enablers (shared trust, shared visual understanding, shared user perspective, shared learning) and four barriers (trusting the system, understanding benefits, economic perspective, learning to manage scope) | Single qualitative case; no quantitative effects | The result screen explains the date and its reasons so that managers can trust the estimate |
+| 2 | Mueller et al. (2022), *Computers in Industry* 142 | Original, method + case | Slow manual specification of ETO commissioning services | Five-step approach to develop a service configurator; tested in a case company | Specification time reduced by more than 70% and people needed by about 40% | One company and one configurator; not generalizable | Justifies a structured digital order with validation rules |
+| 3 | Cavero et al. (2025), *Int. J. Production Economics* 288 | Original, optimisation model | Order promising in hybrid MTO/ETO: acceptance, price, supplier choice | Conceptual framework, literature study, optimisation model, industrial case | Order acceptance should be decided together with price, suppliers, capacity and procurement | Not set in furniture; does not start from a showroom or configurator order | Supports checking capacity and materials before a date is committed |
+| 4 | Červený, Sloup and Červená (2022), *Forests* 13(12) | Original, interview study | Potential of Industry 4.0 in furniture companies of different sizes | Structured interviews with project managers of 31 companies (Germany, Czech Republic, Slovakia); qualitative content analysis | Industry 4.0 priorities depend on company size and production type; relevant for atypical and small-series production | Interview-based, self-reported effects; Central Europe only | The solution must not assume a fully digital factory; data requirements are kept minimal |
+| 5 | Jia, Zhou and Fu (2024), *Heliyon* 10(16) | Original, optimisation | Integrated production and distribution scheduling for custom furniture orders with due dates | Mixed-integer model; multi-objective brain storm optimisation; compared with three advanced methods | Production scheduling and delivery can be optimised jointly | Starts after production requirements are known; no showroom order capture | Shows that delivery commitments depend on production; schedule optimisation itself is out of scope |
+| 6 | Siatras et al. (2024), *Information* 15(6) | Original, framework + pilot | Dynamic scheduling under disturbances | Multi-agent system with digital twin; industrial pilot in bicycle production | Higher production rate; dynamic coordination; early bottleneck detection; managers supervise decisions | Not furniture; twin differs from reality (assumptions, stochasticity, manual work) | Validity warning: the twin is checked against an independent emulator, assumptions are documented |
+| 7 | Lalik et al. (2023), *Industry 4.0* 8(4) | Original, simulation | Effect of production volume on machine load in mass-customised furniture production | Digital twin and FlexSim 3D simulation of a furniture production process; volume scenarios | What-if analysis reveals how volume changes machine load | Capacity analysis, not individual incoming orders; single company | Basis for the production route in the twin; the gap this project addresses |
+| 8 | Łukaszewicz, Urban and Krawczyk-Dembicka (2023), *Bull. Polish Acad. Sci. Tech. Sci.* 71(1) | Original, conceptual case study | Poor information exchange between customer and manufacturer in tailor-made furniture | Case study, process modelling, concept of an Industry 4.0 cooperation framework | Customer information is fragmented; a unified platform with configurators and product data is proposed | Conceptual; not implemented or tested | Motivates the structured digital order and the showroom-to-factory link |
+| 9 | Wu et al. (2023), *J. Engineering Research* 11(3) | Original, system analysis | Production-management systems of customised furniture manufacturing | Analysis of an industrial architecture and application (ERP, WMS, APS, MES) | Roles and integration of the systems; batching, identification and traceability | Focus on production after the order enters the factory; one industrial context | Reference for the data model: stock and planning data from ERP/WMS |
+| 10 | Eichenseer and Winkler (2025), *Int. J. Adv. Manuf. Technol.* 138 | Original, conceptual model | Holistic model of data-oriented shopfloor management | Seven expert interviews; Gioia methodology; member checking | Five elements: information system, process organisation, organisational structure, cross-functional operating model, development path and implementation plan; human stays in the loop | Small qualitative sample; needs validation | The system supports the manager's decision; it does not replace it |
+| 11 | Cannas and Gosling (2021), *Int. J. Production Economics* 241 | Review | ETO research 2010–2020 | Systematic review | Themes: decoupling, engineering and production integration, supply-chain integration, planning and control, uncertainty, Industry 4.0 | Covers up to 2020 only; broad | Frames order fulfilment as a cross-functional problem |
+| 12 | Serrano-Ruiz, Mula and Poler (2021), *J. Manufacturing Systems* 61 | Review | Smart manufacturing scheduling | 68 articles on digital twins, zero-defect manufacturing and intelligent scheduling | Smart scheduling relies on digital twins and real-time data; autonomous disturbance response is underdeveloped | Scheduling-focused; starts from known orders | Supports using a digital twin for decisions under uncertainty |
+| 13 | Schlemitz and Mezhuyev (2024), *J. Industrial Information Integration* 38 | Review | Data collection and standardisation in smart manufacturing | Systematic review of standards, OPC UA, data modelling (Asset Administration Shell) | Interoperability with heterogeneous and legacy systems remains a challenge; consistent data models are needed | Standards-level view; no ordering workflow | The JSON order schema acts as a standardised data layer |
+| 14 | Eichenseer and Winkler (2024), *Int. J. Adv. Manuf. Technol.* 134 | Review | Data-oriented shopfloor management | 79 publications analysed on technology, organisation and people | Technology is well covered; organisation and people are not; no holistic concept | Focus on the shop floor, not on order acceptance | Roles, responsibilities and user interaction are part of the design |
+| 15 | Li, Zhao and Yang (2023), *Applied Sciences* 13(4) | Review | Machine vision in furniture manufacturing | 128 publications (2011–2022) | Applications: information collection, quality detection, positioning and sorting, monitoring | Not about order management | Possible future source of status feedback; out of scope now |
+| 16 | Harfeldt-Berg and Olhager (2024), *Int. J. Production Research* 62(17) | Review | Customer order decoupling point (CODP) | 40 empirical articles; 32 factors in four groups | Factors grouped as market and product, operations, supply chain, performance | Does not address order promising directly | Defines the make-to-order context of the project |
+| 17 | Naldi et al. (2025), *Applied Sciences* 15(13) | Review | Mass customization and Industry 4.0 | 3441 publications from Scopus; bibliometric mapping and synthesis | Three research streams; digital twin integration named as a research opportunity | Broad; little on implementation detail | Positions the work within mass customization with digital twins |
+| 18 | Bouchard, Gamache and Abdulnour (2023), *Sustainability* 15(4) | Review | Operationalising mass customization in manufacturing SMEs | 49 publications, PRISMA | Six factors (product modularity, process modularity, business agility, technology use, digital supply chain, collaboration networks); no prioritisation of factors; tools and maturity not detailed | Does not provide an implementation sequence | The tool is designed for SMEs and integrates with existing processes |
+| 19 | Abdel-Aty and Negri (2024), *J. Intelligent Manufacturing* 35 | Review | Digital thread across the product lifecycle | Systematic review with bibliometric and content analysis | Data integration, traceability and interoperability connect lifecycle stages | Few empirical implementations | The order stays traceable as one object from showroom to result |
+| 20 | Bhalla, Alfnes and Hvolby (2023), *Int. J. Production Research* 61(7) | Review | Delivery date setting in ETO environments | Systematic review of tools and practices | Most tools support tactical capacity planning but are poorly aligned with industry needs | Does not cover showroom input or simulation of single orders | Core justification for focusing on the delivery-date commitment |
+
+
+### 2.3 Table 2. Approaches, what is known, limitations, and how the project responds
+
+| Theme | Approaches in the literature | What is already known | Limitations in the literature | How this project takes it into account |
+|---|---|---|---|---|
+| Delivery-date setting and order acceptance | Planning and decision-support tools for tactical capacity; joint optimisation models (sources 3, 16, 20) | Lead time includes engineering, procurement and production; acceptance, price and capacity should be decided together | Tools concentrate on capacity; not furniture-specific; no showroom or configurator input | One decision only: the delivery-date commitment at order acceptance, using order route and material data |
+| Configuration and the digital order | Configurators; unified customer-to-manufacturer platforms (sources 2, 8, 18, 17) | Configurators can cut specification effort sharply; information exchange is fragmented | Evidence from single companies; frameworks mostly conceptual | A structured JSON order and validation rules, not a full product configurator |
+| System integration | ERP, WMS, APS, MES integration; digital thread; standards (sources 9, 13, 19, 14, 10) | Roles of each system are clear; interoperability and traceability are needed | Focus on production after the order; organisational and human aspects underdeveloped | Backend API and data model linking order, ERP/WMS stock data and twin; the manager makes the final call |
+| Digital twins, simulation and scheduling | Furniture capacity simulation; multi-agent scheduling with digital twin; smart scheduling reviews (sources 7, 6, 12, 5) | Twins support what-if capacity analysis; scheduling benefits from real-time data | Capacity analysis rather than individual orders; scheduling starts from known orders; twin and reality differ | A discrete-event twin evaluates each incoming order; an independent emulator provides the "actual" dates; sensitivity analysis tests input accuracy |
+| Industrial adoption | Interview and case studies on enablers and barriers (sources 1, 4, 14, 10) | Adoption depends on trust, understanding and digital maturity | Qualitative, small or regional samples | The tool assumes low digital maturity, explains its output and keeps the interface minimal |
+| Production feedback | Machine vision for status data (source 15) | Automated status data is technically possible | Not linked to order management | Out of scope; documented as a possible extension |
+
+
+## 3. Customer Order Management and Mass Customization
 
 The first step in the described workflow that takes an order from a showroom to production is the customer order itself. In custom manufacturing, an order has a lot more information than business-related stuff: it also defines the product setup, engineering requirements, material requirements, production operations, resource requirements, and commitment to delivery. The customer order decoupling point (CODP) means where the product gets connected to an order from a customer. Harfeldt-Berg and Olhager (2024) perform a systematic literature review of existing knowledge about CODP to pinpoint the variables referring to the market and product features, operations, supply chains, and performance. Their model recognizes various situations where manufacturing takes place before or after the customer order is placed.
 
@@ -39,7 +90,7 @@ The process of setting the delivery date can also be characterized as an order m
 
 The research indicates that an integrated process should be applied to customer order management. When customers order, for instance, a custom-made piece of furniture, the order should go through all steps from the identification of customer requirements; to setup and specification; to feasibility, delivery commitment, and production planning, instead of being considered a one-time sale transaction.
 
-## 3. ETO/MTO and Order Fulfilment
+## 4. ETO/MTO and Order Fulfilment
 
 The relationship between customer needs and the production process is strong in make-to-order and engineer-to-order environments. Products produced under ETO conditions require customer-specific design and engineering before the actual production starts. On the other hand, in order to manufacture products under MTO conditions, manufacturers generally apply already existing designs and commence the manufacturing process only after official receipt of the order. Cannas and Gosling (2021) identified the integration of design and production processes, supply chain integration, planning and controlling, uncertainty management, and Industry 4.0 as the main research themes in ETO.
 
@@ -49,7 +100,7 @@ The significance of this matter is particularly crucial in intelligent order man
 
 The order fulfilment process should therefore be seen as a single system instead of a chain of disconnected departmental activities. A showroom order should give proper information that can be converted into a validated product configuration, engineering and manufacturing specifications, materials and capacity requirements, and an acceptable delivery assurance.
 
-## 4. Product Configuration and Customer Interaction
+## 5. Product Configuration and Customer Interaction
 
 Configuration is a major link between the customer needs and the relevant information necessary for the manufacturing process. It is indicated that custom production means that the customers may provide such specifications as measurements, materials, colors, elements, and functional requirements, which have to be changed into the product definition from a technical point of view. As a result, systems of product configuration are highly relevant in the mass customization conditions, where the need is to manage a wide range of product diversity without losing touch with the design and manufacturing processes (Naldi et al., 2025).
 
@@ -65,7 +116,7 @@ Bouchard et al. (2023) also conclude that configurators and other digital applic
 
 The showroom stage of the proposed smart order management system has to create a digital order with given product parameters and specific rules of configuration. The product description produced should be applicable in costing, planning of the materials, engineering of the product, planning of production, and manufacture of the products.
 
-## 5. ERP/MES and Data Integration
+## 6. ERP/MES and Data Integration
 
 The efficiency of order fulfillment in custom manufacturing relies heavily on the capability of various information systems to share information punctually and consistently. In a furniture customization domain, any info created during customer interactions must be relayed to the relevant systems in charge of product info, procurement, stock management, production planning, scheduling, and shop floor processing. Hence, system integration becomes crucial in order for intelligent order operation to be achieved.
 
@@ -87,7 +138,7 @@ Based on the literature, the information architecture of a customized furniture 
 
 The exact division of responsibilities depends on the manufacturer’s existing information infrastructure. Nevertheless, the literature indicates the importance of maintaining consistent information across organizational and technological boundaries.
 
-## 6. Production Planning and Intelligent Scheduling
+## 7. Production Planning and Intelligent Scheduling
 
 Production planning and scheduling are important steps in making a customer requirement into a manufacturing activity. It is difficult to schedule in a make-to-order or custom environment because the order may require different processes, routes, delivery dates, resource consumption, etc. Moreover, unexpected events like breakdowns, priority orders, lack of materials, and time variations make the use of fixed schedules unfeasible.
 
@@ -109,7 +160,7 @@ The resulting information flow can be represented as:
 
 The existing literature also points towards the fact that feedback is important. The actual time of processing, status of machinery and any delays and completed work may be different from the assumptions behind the original planning. Thus, the application of Digital Twins and real-time information layers allows adjustment of production information and flexible scheduling (Serrano-Ruiz et al., 2021; Siatras et al., 2024).
 
-## 7. Smart Manufacturing and Digitalization in Furniture Manufacturing
+## 8. Smart Manufacturing and Digitalization in Furniture Manufacturing
 
 Applying Industry 4.0 technologies to the furniture production sector has particular relevance since furniture production increasingly calls for high product diversity, customized customer needs, short production runs, and flexible production processes. Research on furniture industry specifics proves the relevance of such digital technologies as digital design, production management systems, simulation and modeling, machine vision, and data-based decision making.
 
@@ -133,14 +184,17 @@ All the things put together above show that the literature related to furniture 
 
 Nonetheless, the reviewed literature also seems to cover different parts of the production/manufacturing processes. Furniture Industry 4.0 literature discusses technology adoption and its organizational differences; Digital Twin literature deals with production processes simulation and capacity issues; machine vision literature deals with automated content collection and quality control; while digitalization literature discusses implementation conditions. So, the literature gives a lot of information regarding certain technologies but much less about the whole production process from customer communication in the showroom through order confirmation, order configuration, planning, scheduling, execution, and production feedback.
 
-## 8. Individual Article Analysis
+## 9. Limitations the Project Takes into Account
 
-The article-level analysis summarizes each of the 20 selected publications. The first ten publications are original technical or research studies, while the second ten are review papers. The analysis complements the thematic synthesis in Sections 2–7 and is provided in two companion documents:
+- **Synthetic data.** No real factory data are available, so evaluation uses a documented synthetic dataset; results are presented as simulation-based and may not transfer directly to other factories.
+- **Twin and reality differ.** The twin is simulation-based, with simulated synchronisation instead of a live link to machines. To avoid evaluating the twin against its own logic, a separate, more detailed emulator provides the actual dates.
+- **One decision.** The project covers the delivery-date commitment only; it excludes pricing, engineering design automation, shop-floor schedule optimisation and deployment in a live factory.
+- **Varying digital maturity.** The solution does not assume a fully digital factory and keeps data requirements and the interface minimal.
+- **Limited evidence base.** Much of the cited evidence comes from single cases or interviews, so conclusions are not generalised beyond the simulated setting.
+- **Human oversight.** The system supports the manager's decision and explains its reasons; it does not take the decision.
 
-- [03a-original-research-articles.md](03a-original-research-articles.md): analysis of the 10 original research studies.
-- [03b-review-articles.md](03b-review-articles.md): analysis of the 10 review articles.
 
-## 9. Research Gap
+## 10. Research Gap
 
 Based on the literature review, there has been quite considerable research on the aspects of digital and individualized production such as mass customization, order management, product designing, enterprise resource planning (ERP)/manufacturing execution system (MES) integration, production planning, smart scheduling, Digital Twins, and technologies of Industry 4.0 when applied to furniture production. Still, the literature is characterized by the fragmentation of research areas.
 
@@ -172,7 +226,7 @@ The proposed research therefore focuses on integration rather than on a single i
 
 No particular architecture or technology is confirmed by the literature to be the best for all manufacturers of furniture. The literature indicates the technologies and methods that can complement each other in terms of the characteristics and digital maturity of the manufacturing environment. Therefore, empirical studies should be conducted in order to design, implement and assess an integrated solution in real-world furniture manufacturing conditions.
 
-## 10. Conclusion
+## 11. Conclusion
 
 The aim of this literature review is to determine prior studies and findings related to the implementation of the smart order management system in the process of automation of the entire workflow from showroom to factory. The literature reviewed shows that the transfer of customer specifications to manufacturing processes consists of several processes, including customer order management, product configuration, production planning, scheduling, integration of information systems, and realization of operations on the shop floor.
 
