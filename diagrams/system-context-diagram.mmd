@@ -1,0 +1,21 @@
+flowchart LR
+    customer(["Customer<br/>(outside the system)"])
+    manager(["Showroom manager"])
+    planner(["Production planner"])
+    researcher(["Researcher"])
+    factory(["Factory<br/>(simulated by the Factory Emulator)"])
+
+    SYS[["<b>Intelligent Order Management System</b><br/>manager web interface,<br/>backend, digital twin"]]
+
+    customer -. "request and<br/>agreed date" .- manager
+    manager <-->|"order data, confirmed date<br/>delivery-date range, probability, reasons"| SYS
+    planner <-->|"request for factory status<br/>load by station, orders in progress"| SYS
+    researcher <-->|"scenarios, random seed<br/>metrics and test results"| SYS
+    factory -->|"order status updates,<br/>actual completion dates"| SYS
+
+    classDef person fill:#fff3d6,stroke:#b07d00,color:#222
+    classDef ext fill:#eeeeee,stroke:#777,color:#222
+    classDef sys fill:#e8f0fe,stroke:#3367d6,color:#111
+    class manager,planner,researcher person
+    class customer,factory ext
+    class SYS sys
