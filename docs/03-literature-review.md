@@ -1,6 +1,6 @@
 # Literature Review
 
-## Design and Development of an Intelligent Order Management System for Automating Showroom-to-Factory Workflow in Furniture Manufacturing
+## Development Intelligent Order Management System with Digital Twin Integration for Furniture Manufacturing.
 
 **Authors:** Zhannur Meirambek, Ayazhan Orynbasar
 **Date:** September 2026
