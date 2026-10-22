@@ -1,4 +1,4 @@
-# Intelligent Order Management System with Digital Twin Integration for Furniture Manufacturing
+# Development of an Intelligent Order Management System with Digital Twin Integration for Furniture Manufacturing
 
 Diploma project, Software Engineering
 
@@ -51,5 +51,5 @@ Python, SimPy, FastAPI, PostgreSQL, React/TypeScript, Docker. The final choice i
 Analysis and design stage. Setup and test instructions will be added when code appears.
 
 ## Links
-- YouTrack: [link]
+- YouTrack: https://furniture-dt.youtrack.cloud/projects/DIP
 - Documentation: `docs/`
