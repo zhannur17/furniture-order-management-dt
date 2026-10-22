@@ -1,0 +1,39 @@
+flowchart LR
+    manager(["Showroom manager"])
+    planner(["Production planner"])
+    researcher(["Researcher"])
+
+    subgraph SYS["Intelligent Order Management System"]
+        direction TB
+        UC1(["Enter order"])
+        UC2(["Get delivery-date estimate"])
+        UC3(["Confirm order"])
+        UC4(["View orders"])
+        UC5(["View factory status"])
+        UC6(["Run experiment"])
+        V(["Validate order"])
+        S(["Simulate production"])
+        M(["Compute metrics and statistics"])
+    end
+
+    manager --- UC1
+    manager --- UC2
+    manager --- UC3
+    manager --- UC4
+    manager --- UC5
+    planner --- UC5
+    researcher --- UC6
+
+    UC2 -. "include" .-> V
+    UC2 -. "include" .-> S
+    UC6 -. "include" .-> S
+    UC6 -. "include" .-> M
+    UC1 -. "include" .-> V
+
+    classDef person fill:#fff3d6,stroke:#b07d00,color:#222
+    classDef uc fill:#e8f0fe,stroke:#3367d6,color:#111
+    classDef inc fill:#f1f3f4,stroke:#777,color:#111
+    class manager,planner,researcher person
+    class UC1,UC2,UC3,UC4,UC5,UC6 uc
+    class V,S,M inc
+    style SYS fill:#ffffff,stroke:#888
