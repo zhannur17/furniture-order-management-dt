@@ -1,0 +1,1622 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0;font-family:system-ui,sans-serif;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Sylva Twin Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the team's mockup shell (sidebar + workspace), plus a docked API inspector on the right
+   that exposes every backend call the screens make. */
+:root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --field: #edf1fa;
+  --line: #e2e7f1;
+  --fg: #0f1b2d;
+  --muted: #5b6577;
+  --faint: #8a93a3;
+  --accent: #2e6b4e;
+  --accent-strong: #1d5139;
+  --accent-soft: #e2efe8;
+  --on-accent: #ffffff;
+  --risk: #8a4a2f;
+  --risk-soft: #fbe5da;
+  --late: #a2302a;
+  --late-soft: #f9dcd9;
+  --ok: #1d6b45;
+  --ok-soft: #d3efe0;
+  --info: #2c4f86;
+  --info-soft: #e0e8f7;
+  --bneck: #8a5427;
+  --bneck-soft: #fdf1e7;
+  --b1: #6b7a99;
+  --b2: #b0763f;
+  --code-bg: #f7f8fc;
+  --shadow: 0 1px 2px rgba(15, 27, 45, .04), 0 4px 16px rgba(15, 27, 45, .04);
+  --font-ui: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1413; --surface: #161d1b; --field: #1e2724; --line: #27322f;
+    --fg: #e5ebe8; --muted: #9aa8a2; --faint: #6f7d77;
+    --accent: #5aa883; --accent-strong: #7cc39f; --accent-soft: #1c3329; --on-accent: #0b1411;
+    --risk: #f0a582; --risk-soft: #3a2419; --late: #f08f88; --late-soft: #3d1e1c;
+    --ok: #7fd3a6; --ok-soft: #173327; --info: #9bb8ec; --info-soft: #1b2638;
+    --bneck: #f0b27a; --bneck-soft: #33251a; --b1: #8f9cb8; --b2: #d39a62; --code-bg: #121816;
+    --shadow: 0 1px 2px rgba(0,0,0,.3);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1413; --surface: #161d1b; --field: #1e2724; --line: #27322f;
+  --fg: #e5ebe8; --muted: #9aa8a2; --faint: #6f7d77;
+  --accent: #5aa883; --accent-strong: #7cc39f; --accent-soft: #1c3329; --on-accent: #0b1411;
+  --risk: #f0a582; --risk-soft: #3a2419; --late: #f08f88; --late-soft: #3d1e1c;
+  --ok: #7fd3a6; --ok-soft: #173327; --info: #9bb8ec; --info-soft: #1b2638;
+  --bneck: #f0b27a; --bneck-soft: #33251a; --b1: #8f9cb8; --b2: #d39a62; --code-bg: #121816;
+  --shadow: 0 1px 2px rgba(0,0,0,.3);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, input, select { font: inherit; color: inherit; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+.mono { font-family: var(--font-mono); }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- shell ---------- */
+.app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100%; }
+.app.with-log { grid-template-columns: 248px minmax(0, 1fr) 400px; }
+.side { background: var(--surface); border-right: 1px solid var(--line); padding-block: 20px; padding-inline: 16px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 0; height: 100vh; }
+.brand { display: flex; gap: 12px; align-items: center; padding-inline: 4px; }
+.brand-mark { width: 40px; height: 40px; border-radius: 10px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; flex: none; }
+.brand b { display: block; font-size: 17px; color: var(--accent-strong); font-weight: 700; line-height: 1.2; }
+.brand span { font-size: 11px; letter-spacing: .12em; color: var(--muted); font-weight: 600; }
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav button { all: unset; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 9px; color: var(--fg); font-weight: 500; }
+.nav button:hover { background: var(--field); }
+.nav button:focus-visible { outline: 2px solid var(--accent); }
+.nav button.on { background: var(--accent); color: var(--on-accent); }
+.nav .sep { font-size: 11px; letter-spacing: .1em; color: var(--faint); font-weight: 600; padding: 10px 12px 2px; }
+.stream { background: var(--field); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; }
+.stream small { font-size: 11px; letter-spacing: .1em; color: var(--muted); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+.stream .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+.stream b { font-size: 16px; font-weight: 600; }
+.stream .row { display: flex; justify-content: space-between; font-size: 12px; color: var(--risk); font-weight: 600; }
+.me { margin-top: auto; display: flex; gap: 10px; align-items: center; background: var(--field); border-radius: 12px; padding: 10px 12px; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-strong); color: var(--on-accent); display: grid; place-items: center; flex: none; }
+.me b { display: block; font-weight: 600; font-size: 13px; }
+.me span { font-size: 12px; color: var(--muted); }
+
+.main { min-width: 0; display: flex; flex-direction: column; }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; padding-block: 14px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); flex-wrap: wrap; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.crumb { color: var(--muted); font-size: 15px; margin-right: auto; }
+.crumb b { color: var(--fg); font-weight: 600; font-size: 17px; }
+.pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.pill.twin { background: var(--info-soft); color: var(--info); }
+.pill.twin i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+.pill.clock { background: var(--risk-soft); color: var(--risk); }
+.btn-log { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 12.5px; font-weight: 600; }
+.btn-log:focus-visible { outline: 2px solid var(--accent); }
+.btn-log .count { background: var(--accent); color: var(--on-accent); border-radius: 999px; padding: 0 7px; font-size: 11px; }
+.btn-log.on { border-color: var(--accent); color: var(--accent-strong); }
+
+.page { padding-block: 32px 64px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); max-width: 1180px; width: 100%; display: grid; gap: 22px; align-content: start; }
+.page-head { display: grid; gap: 6px; }
+.page-head h1 { font-size: 34px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+.page-head p { margin: 0; color: var(--muted); font-size: 15px; max-width: 70ch; }
+.card { background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--line); min-width: 0; }
+.card h2 { font-size: 18px; font-weight: 600; }
+.card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.eyebrow { font-size: 11px; letter-spacing: .12em; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+.muted { color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+
+/* ---------- buttons ---------- */
+.btn { all: unset; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 18px; border-radius: 10px; font-weight: 600; font-size: 14.5px; transition: background .15s, transform .1s; text-align: center; }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent-strong); }
+.btn.soft { background: var(--field); color: var(--fg); }
+.btn.soft:hover { background: var(--line); }
+.btn.ghost { padding: 7px 10px; color: var(--accent-strong); font-size: 13px; }
+.btn.ghost:hover { background: var(--accent-soft); }
+.btn[disabled] { opacity: .5; pointer-events: none; }
+.actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* ---------- forms ---------- */
+.form-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 36px; }
+.section-title { font-size: 17px; font-weight: 600; padding-bottom: 10px; border-bottom: 1px solid var(--line); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.fields { display: grid; gap: 14px; }
+.f { display: grid; gap: 6px; min-width: 0; }
+.f label { font-size: 13.5px; font-weight: 500; }
+.f input, .f select { width: 100%; background: var(--field); border: 1.5px solid transparent; border-radius: 10px; padding: 11px 13px; font-size: 15px; min-width: 0; }
+.f input:focus, .f select:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+.f.bad input, .f.bad select { border-color: var(--late); background: var(--late-soft); }
+.f .err { color: var(--late); font-size: 12.5px; font-weight: 500; }
+.f .hint { color: var(--muted); font-size: 12.5px; }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.item { border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 14px; }
+.item-head { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-check { display: inline-flex; align-items: center; gap: 7px; background: var(--field); border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; user-select: none; }
+.chip-check input { accent-color: var(--accent); margin: 0; }
+.stock { font-size: 12.5px; display: flex; gap: 6px; align-items: center; }
+.stock.short { color: var(--late); font-weight: 600; }
+.stock.fine { color: var(--ok); }
+.add-item { all: unset; cursor: pointer; text-align: center; padding: 12px; border-radius: 12px; background: var(--info-soft); color: var(--accent-strong); font-weight: 600; border: 1px dashed var(--line); }
+.add-item:focus-visible { outline: 2px solid var(--accent); }
+.form-foot { border-top: 1px solid var(--line); margin-top: 24px; padding-top: 20px; display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.banner { border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; }
+.banner.bad { background: var(--late-soft); color: var(--late); }
+.banner.warn { background: var(--risk-soft); color: var(--risk); }
+.banner b { font-weight: 700; }
+.banner ul { margin: 0; padding-left: 18px; }
+.banner .actions { justify-content: flex-start; }
+
+/* ---------- estimate ---------- */
+.pipeline { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px; position: relative; overflow: hidden; transition: border-color .2s, background .2s; }
+.step small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+.step b { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.step span { font-size: 11.5px; color: var(--muted); }
+.step.run { border-color: var(--accent); background: var(--accent-soft); }
+.step.done { border-color: var(--accent); }
+.step.done small { color: var(--accent-strong); }
+.step.fail { border-color: var(--late); background: var(--late-soft); }
+.hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 32px; align-items: center; }
+.prob { display: grid; gap: 4px; padding-right: 32px; border-right: 1px solid var(--line); }
+.prob .big { font-size: 76px; font-weight: 800; letter-spacing: -.04em; line-height: .95; display: flex; align-items: center; gap: 14px; font-variant-numeric: tabular-nums; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: .02em; white-space: nowrap; }
+.badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.badge.at_risk { background: var(--risk-soft); color: var(--risk); }
+.badge.on_time { background: var(--ok-soft); color: var(--ok); }
+.badge.late { background: var(--late-soft); color: var(--late); }
+.badge.draft { background: var(--field); color: var(--muted); }
+.badge.estimated { background: var(--info-soft); color: var(--info); }
+.badge.confirmed { background: var(--accent-soft); color: var(--accent-strong); }
+.badge.in_production { background: var(--accent); color: var(--on-accent); }
+.badge.completed { background: var(--info-soft); color: var(--info); }
+.badge.plain::before { display: none; }
+.range { display: grid; gap: 10px; }
+.range-track { position: relative; height: 56px; }
+.range-bar { position: absolute; left: 0; right: 0; top: 30px; height: 8px; border-radius: 999px; background: var(--line); }
+.range-band { position: absolute; top: 30px; height: 8px; border-radius: 999px; background: var(--b1); opacity: .45; }
+.mark { position: absolute; top: 26px; width: 16px; height: 16px; border-radius: 50%; transform: translateX(-50%); border: 3px solid var(--surface); }
+.mark.ml { background: var(--accent); }
+.mark.rq { background: var(--risk); }
+.mark.cm { background: var(--fg); width: 12px; height: 12px; top: 28px; border-width: 2px; }
+.flag { position: absolute; top: 0; transform: translateX(-50%); font-size: 11.5px; font-weight: 600; background: var(--risk-soft); color: var(--risk); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.range-labels { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; font-weight: 600; flex-wrap: wrap; }
+.range-labels .ml { color: var(--accent-strong); }
+.reason { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto; gap: 16px; align-items: center; padding-block: 14px; border-top: 1px solid var(--line); }
+.reason:first-of-type { border-top: 0; }
+.reason b { font-weight: 600; font-size: 15px; }
+.reason > span:nth-child(2) { color: var(--muted); font-size: 13px; }
+.delta { background: var(--risk-soft); color: var(--risk); font-weight: 700; font-size: 12.5px; padding: 3px 10px; border-radius: 8px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hist svg { width: 100%; height: auto; display: block; }
+.hist text { font-family: var(--font-ui); }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.cmp { display: grid; gap: 10px; }
+.cmp-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 96px; gap: 12px; align-items: center; font-size: 13.5px; }
+.cmp-row .lab b { display: block; font-weight: 600; }
+.cmp-row .lab span { font-size: 12px; color: var(--muted); }
+.cmp-lane { position: relative; height: 22px; background: var(--field); border-radius: 6px; }
+.cmp-dot { position: absolute; top: 3px; width: 16px; height: 16px; border-radius: 50%; transform: translateX(-50%); }
+.cmp-req { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--risk); }
+.cmp-row .d { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.commit { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto; gap: 18px; align-items: end; }
+.commit .p { font-size: 13.5px; padding-bottom: 11px; }
+.commit .p b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 12.5px; color: var(--muted); }
+.meta b { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---------- tables ---------- */
+.table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--field); padding: 12px 16px; white-space: nowrap; }
+td { padding: 14px 16px; border-top: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: var(--bg); }
+tr.flash td { animation: flash 2.2s ease-out; }
+@keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
+td.id { color: var(--accent-strong); font-weight: 600; }
+td.r, th.r { text-align: right; }
+.search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; flex: 1 1 280px; max-width: 520px; }
+.search input { all: unset; flex: 1; padding: 12px 0; font-size: 14.5px; min-width: 0; }
+.toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.seg { display: inline-flex; background: var(--field); border-radius: 10px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { all: unset; cursor: pointer; padding: 7px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.seg button.on { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); font-weight: 600; }
+.seg button:focus-visible { outline: 2px solid var(--accent); }
+
+/* ---------- factory ---------- */
+.stations { display: grid; gap: 6px; }
+.st { display: grid; gap: 8px; padding: 12px 14px; border-radius: 12px; }
+.st.bn { background: var(--bneck-soft); }
+.st-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.st-top b { font-weight: 500; font-size: 15px; display: inline-flex; gap: 10px; align-items: center; }
+.st-top .pct { font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+.st.bn .pct { color: var(--bneck); }
+.tag { font-size: 10.5px; letter-spacing: .08em; font-weight: 700; background: var(--bneck); color: var(--surface); padding: 3px 9px; border-radius: 999px; }
+.bar { height: 8px; border-radius: 999px; background: var(--field); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .6s ease; }
+.st.bn .bar > i { background: var(--bneck); }
+.st-meta { display: flex; gap: 18px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+.st-meta b { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.feed { display: grid; gap: 10px; max-height: 340px; overflow: auto; }
+.feed-day { display: grid; gap: 4px; padding-left: 14px; border-left: 2px solid var(--line); }
+.feed-day b { font-size: 13px; }
+.feed-day span { font-size: 12.5px; color: var(--muted); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 2px; }
+.kpi b { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.kpi span { font-size: 12.5px; color: var(--muted); }
+
+/* ---------- experiment ---------- */
+.exp-controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 14px; align-items: end; }
+.progress { height: 6px; background: var(--field); border-radius: 999px; overflow: hidden; }
+.progress > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+.verdict { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 8px; white-space: nowrap; }
+.verdict.yes { background: var(--ok-soft); color: var(--ok); }
+.verdict.no { background: var(--risk-soft); color: var(--risk); }
+.best { font-weight: 700; color: var(--accent-strong); }
+.csv { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; margin: 0; white-space: pre; }
+
+/* ---------- API log ---------- */
+.log { background: var(--surface); border-left: 1px solid var(--line); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; min-width: 0; }
+.log-head { padding: 16px 18px 12px; border-bottom: 1px solid var(--line); display: grid; gap: 4px; }
+.log-head div { display: flex; justify-content: space-between; align-items: center; }
+.log-head b { font-size: 15px; }
+.log-head p { margin: 0; font-size: 12px; color: var(--muted); }
+.log-list { overflow: auto; flex: 1; padding: 10px; display: grid; gap: 8px; align-content: start; }
+.call { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.call summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 9px 11px; font-family: var(--font-mono); font-size: 12px; }
+.call summary::-webkit-details-marker { display: none; }
+.call summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.m { font-weight: 600; font-size: 11px; padding: 2px 6px; border-radius: 5px; text-align: center; }
+.m.GET { background: var(--info-soft); color: var(--info); }
+.m.POST { background: var(--accent-soft); color: var(--accent-strong); }
+.m.PUT { background: var(--risk-soft); color: var(--risk); }
+.m.SQL { background: var(--bneck-soft); color: var(--bneck); }
+.m.CALL { background: var(--field); color: var(--muted); }
+.path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.code { font-weight: 600; }
+.code.c2 { color: var(--ok); }
+.code.c4 { color: var(--late); }
+.call .body { border-top: 1px solid var(--line); background: var(--code-bg); padding: 10px 12px; display: grid; gap: 6px; }
+.call .body small { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+.call pre { margin: 0; font-family: var(--font-mono); font-size: 11.5px; line-height: 1.55; white-space: pre; overflow-x: auto; max-height: 300px; }
+.call .who { font-size: 11.5px; color: var(--muted); font-family: var(--font-ui); }
+.empty { color: var(--muted); font-size: 13px; padding: 16px; text-align: center; }
+
+.toast { position: fixed; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--fg); color: var(--bg); padding: 12px 18px; border-radius: 12px; font-weight: 600; opacity: 0; transition: .25s; pointer-events: none; z-index: 40; max-width: calc(100% - 32px); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.mobile-nav { display: none; }
+
+@media (max-width: 1280px) {
+  .app.with-log { grid-template-columns: 248px minmax(0, 1fr); }
+  .log { position: fixed; right: 0; top: 0; bottom: 0; width: min(420px, 100%); z-index: 30; box-shadow: -10px 0 40px rgba(0,0,0,.15); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
+}
+@media (max-width: 980px) {
+  .form-grid, .grid2 { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .pipeline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .prob { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+  .exp-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 820px) {
+  .app, .app.with-log { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .mobile-nav { display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface); border-bottom: 1px solid var(--line); }
+  .mobile-nav button { all: unset; cursor: pointer; white-space: nowrap; padding: 7px 12px; border-radius: 8px; font-weight: 500; font-size: 13.5px; }
+  .mobile-nav button.on { background: var(--accent); color: var(--on-accent); }
+  .top, .page { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .page-head h1 { font-size: 27px; }
+  .prob .big { font-size: 56px; }
+  .reason { grid-template-columns: minmax(0, 1fr) auto; }
+  .reason > span:nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+  .commit { grid-template-columns: minmax(0, 1fr); }
+  .commit .p { padding-bottom: 0; }
+  .cmp-row { grid-template-columns: 96px minmax(0, 1fr) 70px; }
+  .row3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .card { padding: 18px; }
+}
+@media (max-width: 480px) {
+  .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .exp-controls, .kpis { grid-template-columns: minmax(0, 1fr); }
+  .pill.clock { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="app with-log" id="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><path d="M3 11h18v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Z"/><path d="M6 18v2M18 18v2"/></svg></div>
+      <div><b>Sylva Twin</b><span>BESPOKE OMS</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-view="new"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>New order</button>
+      <button data-view="orders"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 13h6"/></svg>Orders</button>
+      <button data-view="factory"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l6 4V10l6 4V6l6 4v11Z"/></svg>Factory status</button>
+      <div class="sep">RESEARCH</div>
+      <button data-view="experiments"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4A1.5 1.5 0 0 0 19 19l-5-10V3"/></svg>Experiments</button>
+    </nav>
+    <div class="stream">
+      <small>TWIN STREAM <i class="dot"></i></small>
+      <b>Plant Cell Alpha</b>
+      <div class="row"><span id="side-sync">6 stations</span><span id="side-jobs">— jobs</span></div>
+    </div>
+    <div class="me">
+      <div class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div>
+      <div><b>Zhannur Meirambek</b><span>Showroom lead</span></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <nav class="mobile-nav" id="mnav">
+      <button data-view="new">New order</button><button data-view="orders">Orders</button><button data-view="factory">Factory</button><button data-view="experiments">Experiments</button>
+    </nav>
+    <header class="top">
+      <div class="crumb" id="crumb">Showroom › <b>Workspace</b></div>
+      <span class="pill twin"><i></i>Digital twin: online</span>
+      <span class="pill clock" id="clock">Factory clock</span>
+      <button class="btn-log on" id="logBtn" aria-pressed="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 4 4-4 4M12 16h7"/></svg>API log <span class="count" id="logCount">0</span></button>
+    </header>
+    <main class="page" id="page"></main>
+  </div>
+
+  <aside class="log" id="log">
+    <div class="log-head">
+      <div><b>Backend API calls</b><button class="btn ghost" id="logClose">Hide</button></div>
+      <p>Every request the screens send to the FastAPI backend, with the JSON that comes back. Newest first.</p>
+    </div>
+    <div class="log-list" id="logList"><div class="empty">No calls yet.</div></div>
+  </aside>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   SIMULATION CORE
+   - Catalog + validation (Order Service)
+   - Factory state (jobs per station)
+   - Digital Twin: Monte Carlo over an aggregate queue model
+   - Factory Emulator: independent, more detailed day-step model
+   - Baselines B1 (history + buffer), B2 (static capacity)
+   ============================================================ */
+
+/* ---------- seeded RNG ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function gauss(rng) {
+  let u = 0, v = 0;
+  while (u === 0) u = rng();
+  while (v === 0) v = rng();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+function lognorm(rng, sigma) { return Math.exp(sigma * gauss(rng) - (sigma * sigma) / 2); }
+function expo(rng, mean) { return -Math.log(1 - rng()) * mean; }
+function poisson(rng, lam) {
+  if (lam <= 0) return 0;
+  const L = Math.exp(-lam); let k = 0, p = 1;
+  do { k++; p *= rng(); } while (p > L);
+  return k - 1;
+}
+
+/* ---------- production line ---------- */
+const HOURS_PER_DAY = 8;
+const CAP_HORIZON_DAYS = 10;      // utilisation = work ahead / capacity of the next 10 working days
+const STATIONS = [
+  { id: 'panel_cutting', name: 'Panel cutting', machines: 1, bp: 0.03, repair: 3 },
+  { id: 'edge_banding',  name: 'Edge banding',  machines: 1, bp: 0.04, repair: 2 },
+  { id: 'drilling',      name: 'Drilling',      machines: 1, bp: 0.03, repair: 2 },
+  { id: 'cnc',           name: 'CNC',           machines: 1, bp: 0.08, repair: 6 },
+  { id: 'painting',      name: 'Painting',      machines: 1, bp: 0.06, repair: 4 },
+  { id: 'staging',       name: 'Staging',       machines: 1, bp: 0.01, repair: 1 },
+];
+const PAINT = 4;
+
+/* ---------- catalog (GET /catalog/products) ---------- */
+const CATALOG = {
+  products: [
+    { product_type: 'wardrobe', label: 'Wardrobe',
+      dimension_limits_mm: { width: [300, 3000], height: [300, 2800], depth: [200, 1000] },
+      materials: ['laminated_chipboard', 'mdf', 'solid_wood'],
+      finishes: ['raw', 'painted', 'veneer', 'laminated'],
+      options: ['soft_close_hinges', 'led_light', 'mirror_door'] },
+    { product_type: 'kitchen_cabinet', label: 'Kitchen cabinet',
+      dimension_limits_mm: { width: [300, 1200], height: [300, 2400], depth: [300, 700] },
+      materials: ['laminated_chipboard', 'mdf'],
+      finishes: ['painted', 'laminated'],
+      options: ['soft_close_hinges', 'led_light'] },
+    { product_type: 'credenza', label: 'Credenza',
+      dimension_limits_mm: { width: [600, 3000], height: [500, 1000], depth: [350, 700] },
+      materials: ['mdf', 'solid_wood', 'laminated_chipboard'],
+      finishes: ['raw', 'painted', 'veneer'],
+      options: ['soft_close_hinges', 'led_light'] },
+    { product_type: 'bookcase', label: 'Bookcase',
+      dimension_limits_mm: { width: [300, 2000], height: [300, 2800], depth: [200, 600] },
+      materials: ['laminated_chipboard', 'mdf', 'solid_wood'],
+      finishes: ['raw', 'painted', 'veneer', 'laminated'],
+      options: ['led_light'] },
+  ],
+};
+const LABELS = {
+  laminated_chipboard: 'Laminated chipboard', mdf: 'MDF', solid_wood: 'Solid oak',
+  raw: 'Raw (oiled)', painted: 'Painted', veneer: 'Veneer', laminated: 'Laminated',
+  soft_close_hinges: 'Soft-close hinges', led_light: 'LED light', mirror_door: 'Mirror door',
+};
+const MATERIAL_UNIT = { laminated_chipboard: { unit: 'sheets', area: 5.8 }, mdf: { unit: 'sheets', area: 5.8 }, solid_wood: { unit: 'panels', area: 1.5 } };
+
+function product(type) { return CATALOG.products.find(p => p.product_type === type); }
+
+/* panel area of one unit in m² (carcass sides + top/bottom + back + shelves) */
+function itemArea(it) {
+  const { width: w, height: h, depth: d } = it.dimensions_mm;
+  return ((2 * h * d + 2 * w * d + w * h) / 1e6) * 1.3;
+}
+function materialNeed(items) {
+  const need = {};
+  for (const it of items) {
+    const u = MATERIAL_UNIT[it.material]; if (!u) continue;
+    need[it.material] = (need[it.material] || 0) + (itemArea(it) * it.quantity * 1.15) / u.area;
+  }
+  for (const k in need) need[k] = Math.ceil(need[k]);
+  return need;
+}
+/* nominal work content (hours) per station for a whole order */
+function orderHours(items) {
+  const H = [0, 0, 0, 0, 0, 0];
+  for (const it of items) {
+    const a = itemArea(it), q = it.quantity, opts = it.options || [];
+    H[0] += (0.4 + 0.22 * a) * q;
+    H[1] += (0.3 + 0.2 * a) * q;
+    H[2] += (0.2 + 0.1 * a + (opts.length ? 0.2 : 0)) * q;
+    const cnc = it.material === 'solid_wood' ? 0.6 + 0.2 * a : it.material === 'mdf' ? 0.4 + 0.13 * a : 0.1 + 0.03 * a;
+    H[3] += cnc * q;
+    const paint = it.finish === 'painted' ? 0.5 + 0.35 * a : it.finish === 'veneer' ? 0.3 + 0.18 * a : it.finish === 'raw' ? 0.2 + 0.08 * a : 0;
+    H[4] += paint * q;
+    H[5] += (0.3 + 0.05 * a + (opts.includes('led_light') ? 0.3 : 0) + (opts.includes('mirror_door') ? 0.2 : 0)) * q;
+  }
+  return H.map(x => Math.round(x * 100) / 100);
+}
+function needsDrying(items) { return items.some(it => it.finish === 'painted' || it.finish === 'veneer'); }
+
+/* ---------- working-day calendar ---------- */
+const DAY_MS = 86400000;
+function startOfDay(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+function isWeekend(d) { const g = d.getDay(); return g === 0 || g === 6; }
+function makeCalendar(today) {
+  let base = startOfDay(today);
+  while (isWeekend(base)) base = new Date(base.getTime() + DAY_MS);
+  const cache = [base];
+  function wdToDate(i) {
+    while (cache.length <= i) {
+      let d = new Date(cache[cache.length - 1].getTime() + DAY_MS);
+      while (isWeekend(d)) d = new Date(d.getTime() + DAY_MS);
+      d.setHours(0, 0, 0, 0);
+      cache.push(d);
+    }
+    return cache[Math.max(0, i)];
+  }
+  /* index of the last working day on or before date (deadline semantics) */
+  function dateToWd(date) {
+    const t = startOfDay(date).getTime();
+    if (t < base.getTime()) return -1;
+    let i = 0;
+    while (wdToDate(i + 1).getTime() <= t) i++;
+    return i;
+  }
+  return { base, wdToDate, dateToWd };
+}
+function iso(d) {
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+function parseISO(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }
+
+/* ---------- validation (Order Service, FR-02) ---------- */
+function validateOrder(order, todayDate) {
+  const det = [];
+  if (!order.customer || !order.customer.name || !order.customer.name.trim()) det.push({ field: 'customer.name', problem: 'Customer name is required' });
+  if (!order.requested_date) det.push({ field: 'requested_date', problem: 'Requested date is required' });
+  else if (startOfDay(parseISO(order.requested_date)) <= startOfDay(todayDate)) det.push({ field: 'requested_date', problem: 'Requested date must be later than today' });
+  if (!order.items || order.items.length < 1) det.push({ field: 'items', problem: 'At least 1 item is required' });
+  if (order.items && order.items.length > 20) det.push({ field: 'items', problem: 'At most 20 items per order' });
+  (order.items || []).forEach((it, i) => {
+    const p = product(it.product_type);
+    if (!p) { det.push({ field: `items[${i}].product_type`, problem: 'Unknown product type' }); return; }
+    for (const k of ['width', 'height', 'depth']) {
+      const v = it.dimensions_mm[k], [lo, hi] = p.dimension_limits_mm[k];
+      if (!Number.isFinite(v) || v < lo || v > hi) det.push({ field: `items[${i}].dimensions_mm.${k}`, problem: `${k[0].toUpperCase() + k.slice(1)} must be between ${lo} and ${hi} mm` });
+    }
+    if (!p.materials.includes(it.material)) det.push({ field: `items[${i}].material`, problem: `Material must be one of: ${p.materials.join(', ')}` });
+    if (!p.finishes.includes(it.finish)) det.push({ field: `items[${i}].finish`, problem: `Finish must be one of: ${p.finishes.join(', ')}` });
+    if (!Number.isInteger(it.quantity) || it.quantity < 1 || it.quantity > 50) det.push({ field: `items[${i}].quantity`, problem: 'Quantity must be an integer from 1 to 50' });
+  });
+  return det;
+}
+
+/* ---------- factory state ---------- */
+/* job: { id, seq, hours[6] nominal, left[6] nominal remaining, idx current station, readyDay, drying, act[6] (emulator only) } */
+function firstStation(h, from = 0) { for (let s = from; s < 6; s++) if (h[s] > 0) return s; return 6; }
+function makeJob(id, seq, hours, opts = {}) {
+  return { id, seq, hours: hours.slice(), left: hours.slice(), idx: firstStation(hours), readyDay: opts.readyDay || 0, drying: !!opts.drying, act: null, startedDay: null };
+}
+/* work ahead at station s = all remaining hours at s of jobs that have not passed s (FIFO: they all go first) */
+function workAhead(jobs) {
+  const a = [0, 0, 0, 0, 0, 0];
+  for (const j of jobs) for (let s = j.idx; s < 6; s++) a[s] += j.left[s];
+  return a;
+}
+function queueLengths(jobs) { const q = [0, 0, 0, 0, 0, 0]; for (const j of jobs) if (j.idx < 6) q[j.idx]++; return q; }
+function stationStatus(jobs) {
+  const ahead = workAhead(jobs), q = queueLengths(jobs);
+  return STATIONS.map((st, s) => {
+    const cap = st.machines * HOURS_PER_DAY * CAP_HORIZON_DAYS;
+    return { station: st.id, utilization: Math.min(0.99, ahead[s] / cap), queue_length: q[s], work_ahead_hours: Math.round(ahead[s]), free_capacity_hours: Math.max(0, Math.round(cap - ahead[s])) };
+  });
+}
+
+/* random catalog item for synthetic orders / background jobs */
+function randomItem(rng) {
+  const p = CATALOG.products[Math.floor(rng() * CATALOG.products.length)];
+  const L = p.dimension_limits_mm, r = (k, lo, hi) => Math.round((lo + (hi - lo) * rng()) / 10) * 10;
+  const finish = rng() < 0.62 && p.finishes.includes('painted') ? 'painted' : p.finishes[Math.floor(rng() * p.finishes.length)];
+  return {
+    product_type: p.product_type,
+    dimensions_mm: { width: r('w', Math.max(L.width[0], 500), Math.min(L.width[1], 2200)), height: r('h', Math.max(L.height[0], 600), Math.min(L.height[1], 2300)), depth: r('d', L.depth[0] + 50, Math.min(L.depth[1], 650)) },
+    material: p.materials[Math.floor(rng() * p.materials.length)],
+    finish, quantity: 1 + Math.floor(rng() * 3), options: p.options.filter(() => rng() < 0.35),
+  };
+}
+/* build a factory whose painting (bottleneck) load is near targetUtil */
+function generateFactory(rng, targetUtil, prefix = 'BG', startSeq = 1) {
+  const jobs = []; let seq = startSeq;
+  const capPaint = STATIONS[PAINT].machines * HOURS_PER_DAY * CAP_HORIZON_DAYS;
+  let guard = 0;
+  while (workAhead(jobs)[PAINT] < targetUtil * capPaint && guard++ < 200) {
+    const items = [randomItem(rng)];
+    const h = orderHours(items);
+    const j = makeJob(`${prefix}-${String(seq).padStart(4, '0')}`, seq++, h, { drying: needsDrying(items) });
+    /* place the job somewhere along its route, older jobs further downstream */
+    const route = [0, 1, 2, 3, 4, 5].filter(s => h[s] > 0);
+    const u = rng();
+    const k = u < 0.42 ? 0 : u < 0.6 ? 1 : u < 0.74 ? 2 : u < 0.86 ? 3 : u < 0.95 ? 4 : 5;
+    const pos = route[Math.min(route.length - 1, k)];
+    for (let s = 0; s < pos; s++) j.left[s] = 0;
+    if (k > 0 || rng() < 0.3) j.left[pos] = Math.round(h[pos] * (0.3 + 0.7 * rng()) * 100) / 100;
+    j.idx = pos; j.items = items;
+    jobs.push(j);
+  }
+  /* overshoot is fine; keep FIFO order by seq: downstream jobs are older */
+  jobs.sort((a, b) => b.idx - a.idx || a.seq - b.seq);
+  jobs.forEach((j, i) => { j.seq = startSeq + i; });
+  return { jobs, nextSeq: startSeq + jobs.length };
+}
+
+/* ---------- DIGITAL TWIN (Monte Carlo) ---------- */
+/* qCal/pCal: calibration factors fitted against emulator runs without disturbances (verification plan, calibration step) */
+const TWIN_PARAMS = { normal: { qSigma: 0.18, pSigma: 0.2, bMult: 1, qCal: 1.12, pCal: 1.08 }, high: { qSigma: 0.25, pSigma: 0.28, bMult: 2, qCal: 1.15, pCal: 1.12 } };
+
+function twinRun(ahead, hours, startH, drying, P, rng, contrib, skipQ = -1, skipB = -1) {
+  let t = startH;
+  for (let s = 0; s < 6; s++) {
+    if (hours[s] <= 0) continue;
+    const st = STATIONS[s];
+    const qn = lognorm(rng, P.qSigma);
+    const free = s === skipQ ? 0 : (ahead[s] / st.machines) * P.qCal * qn;
+    const start = Math.max(t, free);
+    const proc = (hours[s] / st.machines) * P.pCal * lognorm(rng, P.pSigma);
+    let end = start + proc;
+    /* breakdowns of any machine of this station before our order leaves it */
+    const n = poisson(rng, st.bp * P.bMult * st.machines * (end / HOURS_PER_DAY));
+    let bd = 0; for (let k = 0; k < n; k++) bd += expo(rng, st.repair) / st.machines;
+    if (s === skipB) bd = 0;
+    end += bd;
+    if (contrib) { contrib.q[s] += start - t; contrib.b[s] += bd; }
+    if (s === PAINT && drying) end += HOURS_PER_DAY * (0.8 + 0.4 * rng());
+    t = end;
+  }
+  return t;
+}
+/* returns completion working-day indices for each run + average delay contributions */
+function twinEstimate(state, hours, opts) {
+  const P = TWIN_PARAMS[opts.disturbance || 'normal'];
+  const rng = mulberry32(opts.seed ?? 42);
+  const ahead = workAhead(state.jobs);
+  const startH = (opts.materialWaitDays || 0) * HOURS_PER_DAY;
+  const contrib = { q: [0, 0, 0, 0, 0, 0], b: [0, 0, 0, 0, 0, 0] };
+  const days = [], hrs = [];
+  for (let r = 0; r < opts.runs; r++) {
+    const h = twinRun(ahead, hours, startH, !!opts.drying, P, rng, opts.withReasons ? contrib : null, opts.skipQueue ?? -1, opts.skipBreakdowns ?? -1);
+    hrs.push(h);
+    days.push(state.day + Math.floor(Math.max(0, h - 1e-9) / HOURS_PER_DAY));
+  }
+  return { days, hours: hrs, contrib, ahead };
+}
+function quantile(sorted, q) { return sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))))]; }
+
+/* ---------- BASELINES ---------- */
+/* B1: average historical lead time + fixed buffer, same for every order */
+function baselineB1(state, historyMeanDays, bufferDays = 2) { return state.day + Math.round(historyMeanDays) + bufferDays; }
+/* B2: static capacity check against the planned load (70% of capacity), no live queues, no breakdowns, no feedback */
+function baselineB2(state, hours, drying, materialWaitDays = 0) {
+  let t = materialWaitDays * HOURS_PER_DAY;
+  for (let s = 0; s < 6; s++) {
+    if (hours[s] <= 0) continue;
+    const st = STATIONS[s];
+    const plannedAhead = 0.7 * st.machines * HOURS_PER_DAY * CAP_HORIZON_DAYS;
+    t = Math.max(t, plannedAhead / st.machines) + hours[s] / st.machines;
+    if (s === PAINT && drying) t += HOURS_PER_DAY;
+  }
+  return state.day + Math.floor(Math.max(0, t - 1e-9) / HOURS_PER_DAY);
+}
+
+/* ---------- FACTORY EMULATOR (independent, more detailed) ----------
+   Day-step, job-level FIFO, hidden true work content per job (heavier tails,
+   painting 8% slower than the twin assumes, 4% rework), breakdowns that take
+   hours out of a day, operator absence. The twin never reads `act` or this RNG. */
+const EMU_PARAMS = { normal: { pSigma: 0.26, bMult: 1.1, absent: 0.04, rework: 0.04 }, high: { pSigma: 0.36, bMult: 2.3, absent: 0.08, rework: 0.07 } };
+const EMU_SPEED = [1.0, 1.02, 0.98, 1.05, 1.08, 1.0];
+
+function ensureAct(job, rng, E) {
+  if (job.act) return;
+  job.act = job.left.map((h, s) => {
+    if (h <= 0) return 0;
+    let m = lognorm(rng, E.pSigma) * EMU_SPEED[s];
+    if (rng() < E.rework) m *= 1.6;
+    return h * m;
+  });
+  job.actTotal = job.act.slice();
+}
+/* advance the factory by one working day; returns events */
+function emulatorDay(state, rng, E) {
+  const events = { completed: [], moved: [], breakdowns: [] };
+  const day = state.day;
+  for (const j of state.jobs) ensureAct(j, rng, E);
+  for (let s = 0; s < 6; s++) {
+    const st = STATIONS[s];
+    let cap = 0;
+    for (let m = 0; m < st.machines; m++) {
+      let h = HOURS_PER_DAY * (rng() < E.absent ? 0.5 : 1);
+      if (rng() < st.bp * E.bMult) { const lost = Math.min(h, expo(rng, st.repair)); h -= lost; events.breakdowns.push({ station: st.id, hours: Math.round(lost * 10) / 10 }); }
+      cap += h;
+    }
+    const queue = state.jobs.filter(j => j.idx === s && j.readyDay <= day).sort((a, b) => a.seq - b.seq);
+    for (const j of queue) {
+      if (cap <= 1e-6) break;
+      if (j.startedDay === null) j.startedDay = day;
+      const use = Math.min(cap, j.act[s]);
+      cap -= use; j.act[s] -= use;
+      j.left[s] = j.actTotal[s] > 0 ? Math.max(0, j.hours[s] * (j.act[s] / j.actTotal[s])) : 0;
+      if (j.act[s] <= 1e-6) {
+        j.left[s] = 0; j.act[s] = 0;
+        const next = firstStation(j.left, s + 1);
+        if (s === PAINT && j.drying) j.readyDay = day + 1;
+        j.idx = next;
+        if (next >= 6) { j.doneDay = day; events.completed.push(j.id); }
+        else events.moved.push({ id: j.id, to: STATIONS[next].id });
+      }
+    }
+  }
+  state.jobs = state.jobs.filter(j => j.idx < 6);
+  state.day += 1;
+  return events;
+}
+function cloneState(state) {
+  return { day: state.day, jobs: state.jobs.map(j => ({ ...j, hours: j.hours.slice(), left: j.left.slice(), act: j.act ? j.act.slice() : null, actTotal: j.actTotal ? j.actTotal.slice() : null })) };
+}
+/* "actual" completion day of a new order in the emulator */
+function emulateOrder(state, hours, drying, rng, E, readyDay = 0) {
+  const st = cloneState(state);
+  const seq = Math.max(0, ...st.jobs.map(j => j.seq)) + 1;
+  const job = makeJob('NEW', seq, hours, { drying, readyDay: st.day + readyDay });
+  st.jobs.push(job);
+  for (let guard = 0; guard < 400; guard++) {
+    emulatorDay(st, rng, E);
+    if (job.idx >= 6) return job.doneDay;
+  }
+  return st.day;
+}
+
+if (typeof module !== 'undefined') module.exports = { mulberry32, STATIONS, CATALOG, orderHours, itemArea, materialNeed, generateFactory, stationStatus, workAhead, twinEstimate, quantile, baselineB1, baselineB2, emulateOrder, emulatorDay, EMU_PARAMS, makeCalendar, iso, validateOrder, needsDrying, makeJob, randomItem };
+
+</script>
+<script>
+/* ============================================================
+   APP: in-browser stand-ins for the Backend API, Database and
+   Experiment Runner, plus the five manager screens.
+   ============================================================ */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const cal = makeCalendar(new Date());
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const fmt = d => `${MON[d.getMonth()]} ${d.getDate()}`;
+const fmtY = d => `${MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+const fmtW = d => `${WD[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}`;
+const wdDate = i => (i >= 0 ? cal.wdToDate(i) : pastWd(-i));
+function pastWd(n) { let d = new Date(cal.base); while (n > 0) { d = new Date(d.getTime() - DAY_MS); if (!isWeekend(d)) n--; } return d; }
+const today = () => cal.wdToDate(DB.factory.day);
+const isoWd = i => iso(wdDate(i));
+const STATION_NAME = Object.fromEntries(STATIONS.map(s => [s.id, s.name]));
+const CUSTOMERS = ['Studio Architrave', 'Nordics Form', 'Atelier K', 'Lumina Spaces', 'Dana Seitkali', 'Aruzhan Bekova', 'Timur Akhmetov', 'Steppe Loft Studio', 'Madina Omarova', 'Yerlan Sadykov', 'Nomad Co-working', 'Alina Zhumabayeva', 'Ruslan Ibraev', 'Saule Kenzhebek', 'Green Quarter Apartments', 'Assel Nurpeis'];
+const PAST = [['Marcus Vance', 18, 2], ['Oak & Line Interiors', 15, 1], ['Kamila Serik', 9, 0], ['Daniyar Utepov', 6, -1]];
+
+/* ---------------- "Database" ---------------- */
+const DB = {
+  factory: { day: 0, jobs: [] },
+  orders: new Map(),
+  stock: {},
+  seqOrder: 90,
+  histMean: 12,
+  emuRng: mulberry32(9001),
+  arrRng: mulberry32(4242),
+  dealerSeq: 300,
+  paintPerJob: 4,
+  events: [],
+};
+const nextOrderId = () => `ORD-2026-${String(++DB.seqOrder).padStart(4, '0')}`;
+
+function seedDemo() {
+  const rng = mulberry32(7);
+  DB.factory = { day: 0, jobs: [] };
+  DB.orders.clear(); DB.events = []; DB.seqOrder = 90; DB.dealerSeq = 300;
+  DB.emuRng = mulberry32(9001); DB.arrRng = mulberry32(4242);
+  DB.stock = {
+    laminated_chipboard: { in_stock: 46, unit: 'sheets', next_delivery_day: 5 },
+    mdf: { in_stock: 4, unit: 'sheets', next_delivery_day: 6 },
+    solid_wood: { in_stock: 30, unit: 'panels', next_delivery_day: 8 },
+  };
+  /* completed history */
+  PAST.forEach(([name, back, late]) => {
+    const items = [randomItem(rng)];
+    const id = nextOrderId();
+    const req = -back - 2;
+    DB.orders.set(id, {
+      order_id: id, created_at: isoWd(req - 14) + 'T09:30:00Z', customer: { name, contact: '' }, requested_date: isoWd(req), items,
+      status: 'completed', committed_date: isoWd(req + 1), completed_date: isoWd(req + 1 + late),
+      estimate: { earliest: isoWd(req - 2), most_likely: isoWd(req), latest: isoWd(req + 3), probability_on_requested_date: 0.6, assessment: 'at_risk', reasons: [] },
+    });
+  });
+  /* live factory, bottleneck painting near 93% */
+  const f = generateFactory(rng, 0.93, 'X', 1);
+  DB.factory.jobs = f.jobs;
+  let c = 0;
+  f.jobs.forEach((j, i) => {
+    if (i % 2 === 1 || c >= CUSTOMERS.length) { j.id = `DLR-${++DB.dealerSeq}`; j.dealer = true; return; }
+    const id = nextOrderId(); j.id = id;
+    const e = jobOutlook(j, 60, 11 + i);
+    const reqWd = Math.max(1, e.ml + Math.round(rng() * 5) - 2);
+    const commitWd = Math.max(reqWd, e.ml + (rng() < 0.6 ? 1 : 0));
+    const started = j.idx > firstStation(j.hours) || j.left[j.idx] < j.hours[j.idx] - 1e-6;
+    if (started) j.startedDay = -1;
+    DB.orders.set(id, {
+      order_id: id, created_at: isoWd(-12 + Math.floor(i / 2)) + 'T10:15:00Z',
+      customer: { name: CUSTOMERS[c++], contact: '' }, requested_date: isoWd(reqWd), items: j.items,
+      status: started ? 'in_production' : 'confirmed', committed_date: isoWd(commitWd), confirmed_at: isoWd(-10 + Math.floor(i / 2)) + 'T10:20:00Z',
+      estimate: { earliest: isoWd(e.p5), most_likely: isoWd(e.ml), latest: isoWd(e.p95), probability_on_requested_date: e.prob(reqWd), assessment: assess(e.prob(reqWd)), reasons: [] },
+      job: id,
+    });
+  });
+  /* calibrate dealer arrivals and B1 history */
+  const r2 = mulberry32(55); let paint = 0;
+  for (let i = 0; i < 200; i++) paint += orderHours([randomItem(r2)])[PAINT];
+  DB.paintPerJob = paint / 200;
+  const hist = [];
+  for (let i = 0; i < 30; i++) {
+    const F = generateFactory(r2, 0.85 + 0.1 * r2(), 'H', 1); const it = [randomItem(r2)];
+    hist.push(emulateOrder({ day: 0, jobs: F.jobs }, orderHours(it), needsDrying(it), r2, EMU_PARAMS.normal));
+  }
+  DB.histMean = hist.reduce((a, b) => a + b, 0) / hist.length;
+}
+/* twin outlook for a job already in the factory: everything with a lower seq goes first */
+function jobOutlook(job, runs, seed) {
+  const ahead = { day: DB.factory.day, jobs: DB.factory.jobs.filter(x => x.seq < job.seq) };
+  const r = twinEstimate(ahead, job.left, { runs, seed, drying: job.drying && job.idx <= PAINT, materialWaitDays: Math.max(0, job.readyDay - DB.factory.day) });
+  const s = r.days.slice().sort((a, b) => a - b);
+  return { p5: quantile(s, 0.05), ml: quantile(s, 0.5), p95: quantile(s, 0.95), prob: wd => r.days.filter(d => d <= wd).length / r.days.length };
+}
+const assess = p => (p >= 0.8 ? 'on_time' : p >= 0.5 ? 'at_risk' : 'late');
+const ASSESS_LABEL = { on_time: 'On time', at_risk: 'At risk', late: 'Likely late' };
+const STATUS_LABEL = { draft: 'Draft', estimated: 'Estimated', confirmed: 'Confirmed', in_production: 'In production', completed: 'Completed' };
+
+/* ---------------- Backend API (FastAPI stand-in) ---------------- */
+const LOG = [];
+function apiError(status, code, message, details = []) { return { status, body: { error: { code, message, details } } }; }
+function logCall(method, path, status, req, res, who) {
+  LOG.unshift({ method, path, status, req, res, who, t: new Date() });
+  renderLog();
+}
+async function api(method, path, body) {
+  const t0 = performance.now();
+  let out;
+  try { out = route(method, path, body); }
+  catch (e) { console.error(e); out = apiError(500, 'server_error', String(e)); }
+  const ms = Math.round(performance.now() - t0);
+  logCall(method, path, out.status, body, out.body, out.who || `${ms} ms`);
+  await new Promise(r => setTimeout(r, 120));
+  return out;
+}
+function route(method, path, body) {
+  const [p, q] = path.split('?');
+  const params = new URLSearchParams(q || '');
+  if (method === 'GET' && p === '/catalog/products') return { status: 200, body: { products: CATALOG.products.map(({ label, ...x }) => x) } };
+  if (method === 'POST' && p === '/orders/estimate') return estimateHandler(body, params.get('compare') === 'true');
+  if (method === 'POST' && p === '/orders') return createHandler(body);
+  if (method === 'GET' && p === '/orders') return listHandler(params);
+  if (method === 'GET' && p === '/factory/status') return { status: 200, body: factoryStatus() };
+  let m;
+  if ((m = p.match(/^\/orders\/([\w-]+)$/))) {
+    const o = DB.orders.get(m[1]);
+    if (!o) return apiError(404, 'order_not_found', `Order ${m[1]} was not found.`);
+    if (method === 'GET') return { status: 200, body: publicOrder(o) };
+    if (method === 'PUT') {
+      if (o.status === 'in_production' || o.status === 'completed') return apiError(409, 'order_locked', 'This order is already in production and cannot be changed.');
+      const det = validateOrder({ ...o, ...body }, today());
+      if (det.length) return apiError(422, 'invalid_order', `The order has ${det.length} problem${det.length > 1 ? 's' : ''}. Please correct them and try again.`, det);
+      Object.assign(o, body, { status: o.status === 'confirmed' ? 'confirmed' : 'draft' });
+      return { status: 200, body: publicOrder(o) };
+    }
+  }
+  return apiError(400, 'bad_request', 'Unknown endpoint');
+}
+function publicOrder(o) { const { job, _days, ...x } = o; return JSON.parse(JSON.stringify(x)); }
+
+function materialCheck(items) {
+  const need = materialNeed(items), short = [];
+  for (const [mat, n] of Object.entries(need)) {
+    const s = DB.stock[mat];
+    if (s.in_stock < n) short.push({ material: mat, needed: n, unit: s.unit, in_stock: s.in_stock, next_delivery_date: isoWd(s.next_delivery_day) });
+  }
+  return { need, short };
+}
+
+function estimateHandler(body, compare) {
+  const det = validateOrder(body, today());
+  if (det.length) return apiError(422, 'invalid_order', `The order has ${det.length} problem${det.length > 1 ? 's' : ''}. Please correct them and try again.`, det);
+  const { short } = materialCheck(body.items);
+  if (short.length && !body.allow_backorder) return apiError(409, 'material_shortage', 'Not enough of the selected material is in stock.', short);
+  const day = DB.factory.day;
+  const matWait = short.length ? Math.max(...short.map(s => DB.stock[s.material].next_delivery_day - day)) : 0;
+  const hours = orderHours(body.items), drying = needsDrying(body.items);
+  const seed = 42, runs = 200;
+  const t0 = performance.now();
+  const r = twinEstimate(DB.factory, hours, { runs, seed, drying, materialWaitDays: matWait });
+  const ms = performance.now() - t0;
+  const s = r.days.slice().sort((a, b) => a - b);
+  const reqWd = cal.dateToWd(parseISO(body.requested_date));
+  const prob = r.days.filter(d => d <= reqWd).length / runs;
+  /* reasons: what-if runs with the same random numbers. How much earlier would the order
+     finish on average if this station had no queue, or no breakdowns, or the material were in stock? */
+  const q = queueLengths(DB.factory.jobs);
+  const mean = arr => arr.reduce((x, y) => x + y, 0) / arr.length;
+  const base = mean(r.hours), whatIf = extra => mean(twinEstimate(DB.factory, hours, { runs, seed, drying, materialWaitDays: matWait, ...extra }).hours);
+  const reasons = [];
+  if (matWait > 0) { const eff = (base - whatIf({ materialWaitDays: 0 })) / HOURS_PER_DAY; reasons.push({ station: 'materials', effect_days: Math.max(0.5, Math.round(eff * 2) / 2), note: `Waiting for the delivery of ${short.map(x => LABELS[x.material].toLowerCase()).join(', ')} on ${short[0].next_delivery_date}` }); }
+  STATIONS.forEach((st, i) => {
+    if (hours[i] <= 0) return;
+    const qd = Math.max(0, base - whatIf({ skipQueue: i })) / HOURS_PER_DAY, bd = Math.max(0, base - whatIf({ skipBreakdowns: i })) / HOURS_PER_DAY, eff = qd + bd;
+    if (eff < 0.3) return;
+    const note = bd > qd ? 'One machine breakdown is likely in this period' : `Queue of ${q[i]} order${q[i] === 1 ? '' : 's'} · ${Math.round(r.ahead[i])} h of work ahead`;
+    reasons.push({ station: st.id, effect_days: Math.round(eff * 2) / 2, note });
+  });
+  reasons.sort((a, b) => b.effect_days - a.effect_days);
+  const id = body.order_id && DB.orders.has(body.order_id) ? body.order_id : nextOrderId();
+  const estimate = {
+    earliest: isoWd(quantile(s, 0.05)), most_likely: isoWd(quantile(s, 0.5)), latest: isoWd(quantile(s, 0.95)),
+    probability_on_requested_date: Math.round(prob * 100) / 100, assessment: assess(prob), reasons: reasons.slice(0, 3),
+    simulation: { runs, seed, factory_state_time: isoWd(day) + 'T08:00:00Z', duration_seconds: Math.round(ms) / 1000 },
+  };
+  const prev = DB.orders.get(id);
+  const order = {
+    order_id: id, created_at: prev?.created_at || new Date().toISOString().slice(0, 19) + 'Z',
+    customer: body.customer, requested_date: body.requested_date, items: body.items, allow_backorder: !!body.allow_backorder,
+    status: 'estimated', estimate, committed_date: null, _days: r.days, _matWait: matWait,
+  };
+  DB.orders.set(id, order);
+  const res = { order_id: id, status: 'estimated', requested_date: body.requested_date, estimate };
+  if (compare) res.comparison = { digital_twin: estimate.most_likely, b1_average_lead_time_plus_buffer: isoWd(baselineB1(DB.factory, DB.histMean)), b2_static_capacity_check: isoWd(baselineB2(DB.factory, hours, drying, matWait)) };
+  order._comparison = res.comparison;
+  return { status: 200, body: res };
+}
+
+function createHandler(body) {
+  if (body.status === 'draft') {
+    const id = body.order_id && DB.orders.has(body.order_id) ? body.order_id : nextOrderId();
+    const prev = DB.orders.get(id) || {};
+    const o = { ...prev, order_id: id, created_at: prev.created_at || new Date().toISOString().slice(0, 19) + 'Z', customer: body.customer, requested_date: body.requested_date, items: body.items, status: 'draft', estimate: prev.estimate || null, committed_date: null };
+    DB.orders.set(id, o);
+    return { status: 201, body: publicOrder(o) };
+  }
+  const o = DB.orders.get(body.order_id);
+  if (!o) return apiError(404, 'order_not_found', `Order ${body.order_id} was not found.`);
+  if (!body.committed_date) return apiError(422, 'invalid_order', 'A committed date is required.', [{ field: 'committed_date', problem: 'Choose the date you promise the customer' }]);
+  if (startOfDay(parseISO(body.committed_date)) <= startOfDay(today())) return apiError(422, 'invalid_order', 'The committed date must be later than today.', [{ field: 'committed_date', problem: 'Committed date must be later than today' }]);
+  o.status = 'confirmed'; o.committed_date = body.committed_date; o.confirmed_at = new Date().toISOString().slice(0, 19) + 'Z';
+  /* FR-10: the factory state now includes this order; stock is reserved */
+  const need = materialNeed(o.items);
+  for (const [m, n] of Object.entries(need)) DB.stock[m].in_stock = Math.max(0, DB.stock[m].in_stock - n);
+  const seq = Math.max(0, ...DB.factory.jobs.map(j => j.seq)) + 1;
+  const job = makeJob(o.order_id, seq, orderHours(o.items), { drying: needsDrying(o.items), readyDay: DB.factory.day + (o._matWait || 0) });
+  job.items = o.items;
+  DB.factory.jobs.push(job); o.job = job.id;
+  return { status: 201, body: { order_id: o.order_id, status: o.status, requested_date: o.requested_date, committed_date: o.committed_date, estimate: { earliest: o.estimate.earliest, most_likely: o.estimate.most_likely, latest: o.estimate.latest }, confirmed_at: o.confirmed_at } };
+}
+
+function listHandler(params) {
+  let items = [...DB.orders.values()].reverse();
+  const st = params.get('status'); if (st) items = items.filter(o => o.status === st);
+  return { status: 200, body: { total: items.length, items: items.map(o => ({ order_id: o.order_id, customer: o.customer.name, status: o.status, requested_date: o.requested_date, committed_date: o.committed_date, most_likely: o.estimate?.most_likely || null })) } };
+}
+function factoryStatus() {
+  const ss = stationStatus(DB.factory.jobs);
+  const bn = ss.reduce((a, b) => (b.utilization > a.utilization ? b : a));
+  return { as_of: isoWd(DB.factory.day) + 'T08:00:00Z', stations: ss.map(s => ({ ...s, utilization: Math.round(s.utilization * 100) / 100 })), bottleneck: bn.station, orders_in_progress: DB.factory.jobs.length };
+}
+
+/* ---------------- Factory Emulator: one working day ---------------- */
+function advanceDay() {
+  const day = DB.factory.day;
+  /* other sales channels keep the line loaded */
+  const lam = 6.6 / DB.paintPerJob, n = poisson(DB.arrRng, lam), arrivals = [];
+  for (let i = 0; i < n; i++) {
+    const items = [randomItem(DB.arrRng)];
+    const seq = Math.max(0, ...DB.factory.jobs.map(j => j.seq)) + 1;
+    const j = makeJob(`DLR-${++DB.dealerSeq}`, seq, orderHours(items), { drying: needsDrying(items), readyDay: day });
+    j.items = items; j.dealer = true; DB.factory.jobs.push(j); arrivals.push(j.id);
+  }
+  const before = new Map(DB.factory.jobs.map(j => [j.id, j.startedDay]));
+  const ev = emulatorDay(DB.factory, DB.emuRng, EMU_PARAMS.normal);
+  for (const s of Object.values(DB.stock)) if (s.next_delivery_day <= DB.factory.day) { s.in_stock += s.unit === 'panels' ? 40 : 30; s.next_delivery_day = DB.factory.day + 7; }
+  const started = [], done = [];
+  for (const j of DB.factory.jobs) if (before.get(j.id) == null && j.startedDay != null) started.push(j.id);
+  for (const o of DB.orders.values()) {
+    if (!o.job) continue;
+    if (started.includes(o.job) && o.status === 'confirmed') o.status = 'in_production';
+    if (ev.completed.includes(o.job)) { o.status = 'completed'; o.completed_date = isoWd(day); done.push(o.order_id); }
+  }
+  const tracked = ev.moved.filter(m => !m.id.startsWith('DLR'));
+  DB.events.unshift({ day, arrivals, completed: ev.completed, done, started: started.filter(id => !id.startsWith('DLR')), moved: tracked, breakdowns: ev.breakdowns });
+  logCall('SQL', 'emulator → factory_state', 200, null, {
+    as_of: isoWd(DB.factory.day) + 'T08:00:00Z', source: 'factory_emulator',
+    breakdowns: ev.breakdowns, moved: ev.moved.slice(0, 12), completed: ev.completed, new_dealer_orders: arrivals.length,
+  }, 'Factory Emulator writes a status update');
+}
+
+/* ---------------- UI shell ---------------- */
+let VIEW = 'new';
+const UI = { form: null, editingId: null, errors: {}, banner: null, est: null, commitWd: null, filter: 'all', search: '', flash: null, detail: null, exp: null, expRunning: false, logOpen: true };
+
+function setView(v, opts = {}) {
+  VIEW = v;
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === (v === 'estimate' ? 'new' : v === 'detail' ? 'orders' : v)));
+  const crumbs = { new: ['Showroom', 'New order'], estimate: ['Showroom', 'Delivery estimate'], orders: ['Showroom', 'Orders'], detail: ['Orders', UI.detail || ''], factory: ['Production', 'Factory status'], experiments: ['Research', 'Experiments'] };
+  $('#crumb').innerHTML = `${esc(crumbs[v][0])} › <b>${esc(crumbs[v][1])}</b>`;
+  try { if (['new', 'orders', 'factory', 'experiments'].includes(v)) history.replaceState(null, '', '#' + v); } catch (e) {}
+  render();
+  if (!opts.keepScroll) window.scrollTo(0, 0);
+}
+function render() {
+  const page = $('#page');
+  ({ new: renderNew, estimate: renderEstimate, orders: renderOrders, detail: renderDetail, factory: renderFactory, experiments: renderExperiments })[VIEW](page);
+  $('#clock').textContent = `Factory clock: ${fmtW(today())}`;
+  $('#side-jobs').textContent = `${DB.factory.jobs.length} jobs on the line`;
+}
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600); }
+
+function renderLog() {
+  $('#logCount').textContent = LOG.length;
+  const list = $('#logList');
+  if (!LOG.length) { list.innerHTML = '<div class="empty">No calls yet.</div>'; return; }
+  list.innerHTML = LOG.slice(0, 60).map((c, i) => `
+    <details class="call" ${i === 0 ? 'open' : ''}>
+      <summary><span class="m ${c.method}">${c.method}</span><span class="path" title="${esc(c.path)}">${esc(c.path)}</span><span class="code ${c.status < 300 ? 'c2' : 'c4'}">${c.status}</span></summary>
+      <div class="body">
+        <span class="who">${esc(c.who)} · ${c.t.toLocaleTimeString()}</span>
+        ${c.req ? `<small>Request</small><pre>${esc(JSON.stringify(c.req, null, 2))}</pre>` : ''}
+        <small>Response</small><pre>${esc(JSON.stringify(c.res, null, 2))}</pre>
+      </div>
+    </details>`).join('');
+}
+function setLog(open) {
+  UI.logOpen = open;
+  $('#log').hidden = !open;
+  $('#app').classList.toggle('with-log', open);
+  $('#logBtn').classList.toggle('on', open);
+  $('#logBtn').setAttribute('aria-pressed', String(open));
+}
+
+/* ---------------- New order ---------------- */
+function defaultForm() {
+  return {
+    customer: { name: 'Aigerim Nurlanova', contact: '+7 700 000 00 00' },
+    requested_date: isoWd(DB.factory.day + 14),
+    allow_backorder: false,
+    items: [{ product_type: 'wardrobe', dimensions_mm: { width: 2000, height: 2400, depth: 600 }, material: 'laminated_chipboard', finish: 'painted', color: 'RAL9010', quantity: 2, options: ['soft_close_hinges', 'led_light'] }],
+  };
+}
+function orderPayload() {
+  const f = UI.form;
+  const p = {
+    customer: { name: f.customer.name, contact: f.customer.contact }, requested_date: f.requested_date,
+    items: f.items.map(it => { const x = { product_type: it.product_type, dimensions_mm: { ...it.dimensions_mm }, material: it.material, finish: it.finish, quantity: it.quantity, options: it.options.slice() }; if (it.finish === 'painted') x.color = it.color || 'RAL9010'; return x; }),
+  };
+  if (UI.editingId) p.order_id = UI.editingId;
+  if (f.allow_backorder) p.allow_backorder = true;
+  return p;
+}
+const errFor = k => UI.errors[k] ? `<div class="err">${esc(UI.errors[k])}</div>` : '';
+const badCls = k => (UI.errors[k] ? ' bad' : '');
+function renderNew(page) {
+  if (!UI.form) UI.form = defaultForm();
+  const f = UI.form;
+  const { need } = materialCheck(f.items);
+  page.innerHTML = `
+    <div class="page-head"><h1>${UI.editingId ? `Edit ${esc(UI.editingId)}` : 'New order'}</h1><p>Enter the customer's request. The digital twin simulates it in the current factory state and returns a delivery-date range.</p></div>
+    ${UI.banner || ''}
+    <form class="card" id="orderForm" novalidate>
+      <div class="form-grid">
+        <div>
+          <div class="section-title">Customer &amp; logistics</div>
+          <div class="fields">
+            <div class="f${badCls('customer.name')}"><label for="f-name">Customer name</label><input id="f-name" value="${esc(f.customer.name)}" autocomplete="off">${errFor('customer.name')}</div>
+            <div class="f"><label for="f-contact">Contact</label><input id="f-contact" value="${esc(f.customer.contact)}" autocomplete="off"></div>
+            <div class="f${badCls('requested_date')}"><label for="f-date">Requested date</label><input id="f-date" type="date" value="${esc(f.requested_date)}">${errFor('requested_date') || `<div class="hint">Today on the factory clock is ${fmtW(today())}.</div>`}</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Item specification <span class="muted" style="font-size:13px;font-weight:500">${f.items.length} item${f.items.length > 1 ? 's' : ''}</span></div>
+          <div class="fields">
+            ${f.items.map((it, i) => itemHTML(it, i, need)).join('')}
+            <button type="button" class="add-item" id="addItem">+ Add another item</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-foot">
+        <span class="muted" style="font-size:13px">Sends <span class="mono">POST /orders/estimate?compare=true</span></span>
+        <div class="actions">
+          <button type="button" class="btn soft" id="saveDraft">Save as draft</button>
+          <button type="submit" class="btn primary"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></svg>Get delivery estimate</button>
+        </div>
+      </div>
+    </form>`;
+  bindForm();
+}
+function itemHTML(it, i, need) {
+  const p = product(it.product_type), L = p.dimension_limits_mm, k = `items[${i}]`;
+  const s = DB.stock[it.material], n = need[it.material] || 0;
+  const stockLine = s ? `<div class="stock ${s.in_stock < n ? 'short' : 'fine'}">${s.in_stock < n ? '⚠' : '✓'} ${s.in_stock} ${s.unit} in stock · this order needs ${n}${s.in_stock < n ? ` · next delivery ${fmt(wdDate(s.next_delivery_day))}` : ''}</div>` : '';
+  const opt = (arr, cur) => arr.map(v => `<option value="${v}" ${v === cur ? 'selected' : ''}>${esc(LABELS[v] || v)}</option>`).join('');
+  return `<div class="item" data-i="${i}">
+    <div class="item-head"><span>Item ${i + 1}</span>${UI.form.items.length > 1 ? `<button type="button" class="btn ghost" data-remove="${i}">Remove</button>` : ''}</div>
+    <div class="f${badCls(k + '.product_type')}"><label for="f-i${i}-type">Product type</label><select id="f-i${i}-type" data-k="product_type">${CATALOG.products.map(x => `<option value="${x.product_type}" ${x.product_type === it.product_type ? 'selected' : ''}>${x.label}</option>`).join('')}</select></div>
+    <div class="row3">
+      ${['width', 'height', 'depth'].map(d => `<div class="f${badCls(`${k}.dimensions_mm.${d}`)}"><label for="f-i${i}-${d}">${d[0].toUpperCase() + d.slice(1)} (mm)</label><input id="f-i${i}-${d}" type="number" inputmode="numeric" data-dim="${d}" value="${it.dimensions_mm[d]}"><div class="hint">${L[d][0]}–${L[d][1]}</div>${errFor(`${k}.dimensions_mm.${d}`)}</div>`).join('')}
+    </div>
+    <div class="row2">
+      <div class="f${badCls(k + '.material')}"><label for="f-i${i}-mat">Material</label><select id="f-i${i}-mat" data-k="material">${opt(p.materials, it.material)}</select>${errFor(k + '.material')}</div>
+      <div class="f${badCls(k + '.finish')}"><label for="f-i${i}-fin">Finish</label><select id="f-i${i}-fin" data-k="finish">${opt(p.finishes, it.finish)}</select>${errFor(k + '.finish')}</div>
+    </div>
+    ${stockLine}
+    <div class="row2">
+      <div class="f${badCls(k + '.quantity')}"><label for="f-i${i}-qty">Quantity</label><input id="f-i${i}-qty" type="number" inputmode="numeric" data-k="quantity" value="${it.quantity}">${errFor(k + '.quantity')}</div>
+      ${it.finish === 'painted' ? `<div class="f"><label for="f-i${i}-col">Colour</label><input id="f-i${i}-col" data-k="color" value="${esc(it.color || 'RAL9010')}"></div>` : '<div></div>'}
+    </div>
+    <div class="chips">${p.options.map(o => `<label class="chip-check"><input type="checkbox" data-opt="${o}" ${it.options.includes(o) ? 'checked' : ''}>${LABELS[o]}</label>`).join('')}</div>
+  </div>`;
+}
+function bindForm() {
+  const f = UI.form;
+  $('#f-name').oninput = e => (f.customer.name = e.target.value);
+  $('#f-contact').oninput = e => (f.customer.contact = e.target.value);
+  $('#f-date').oninput = e => (f.requested_date = e.target.value);
+  document.querySelectorAll('.item').forEach(el => {
+    const it = f.items[+el.dataset.i];
+    el.querySelectorAll('[data-dim]').forEach(inp => (inp.oninput = () => { it.dimensions_mm[inp.dataset.dim] = inp.value === '' ? NaN : Number(inp.value); refreshStock(); }));
+    el.querySelectorAll('[data-k]').forEach(inp => (inp.onchange = inp.oninput = () => {
+      const k = inp.dataset.k;
+      if (k === 'quantity') { it.quantity = inp.value === '' ? NaN : Number(inp.value); refreshStock(); return; }
+      it[k] = inp.value;
+      if (k === 'product_type') { const p = product(it.product_type); if (!p.materials.includes(it.material)) it.material = p.materials[0]; if (!p.finishes.includes(it.finish)) it.finish = p.finishes[0]; it.options = it.options.filter(o => p.options.includes(o)); }
+      if (k !== 'color' && inp.tagName === 'SELECT') render();
+    }));
+    el.querySelectorAll('[data-opt]').forEach(cb => (cb.onchange = () => { it.options = cb.checked ? [...it.options, cb.dataset.opt] : it.options.filter(o => o !== cb.dataset.opt); }));
+  });
+  document.querySelectorAll('[data-remove]').forEach(b => (b.onclick = () => { f.items.splice(+b.dataset.remove, 1); render(); }));
+  $('#addItem').onclick = () => { f.items.push({ product_type: 'kitchen_cabinet', dimensions_mm: { width: 600, height: 720, depth: 560 }, material: 'laminated_chipboard', finish: 'laminated', quantity: 4, options: ['soft_close_hinges'] }); render(); };
+  $('#saveDraft').onclick = async () => {
+    const r = await api('POST', '/orders', { ...orderPayload(), status: 'draft' });
+    if (r.status < 300) { UI.editingId = r.body.order_id; toast(`Saved ${r.body.order_id} as a draft`); }
+  };
+  $('#orderForm').onsubmit = e => { e.preventDefault(); runEstimate(); };
+  const bo = $('#allowBackorder'); if (bo) bo.onclick = () => { f.allow_backorder = true; runEstimate(); };
+  const sw = $('#swapMat'); if (sw) sw.onclick = () => { f.items.forEach(it => { const p = product(it.product_type); const ok = p.materials.find(m => DB.stock[m].in_stock >= (materialNeed([{ ...it, material: m }])[m] || 0)); if (ok) it.material = ok; }); UI.banner = null; render(); };
+}
+function refreshStock() {
+  const { need } = materialCheck(UI.form.items.filter(it => Number.isFinite(it.quantity) && Object.values(it.dimensions_mm).every(Number.isFinite)));
+  document.querySelectorAll('.item').forEach(el => {
+    const it = UI.form.items[+el.dataset.i], s = DB.stock[it.material], n = need[it.material] || 0, line = el.querySelector('.stock');
+    if (!line || !s) return;
+    line.className = `stock ${s.in_stock < n ? 'short' : 'fine'}`;
+    line.textContent = `${s.in_stock < n ? '⚠' : '✓'} ${s.in_stock} ${s.unit} in stock · this order needs ${n}${s.in_stock < n ? ` · next delivery ${fmt(wdDate(s.next_delivery_day))}` : ''}`;
+  });
+}
+
+/* ---------------- Estimate flow ---------------- */
+const PIPE = [
+  ['Order Service', 'Validate order', 'schema + catalog rules'],
+  ['Order Service', 'Check materials', 'stock vs. sheets needed'],
+  ['Estimation Service', 'Load factory state', 'queues, orders in progress'],
+  ['Digital twin', 'Monte Carlo × 200', 'seed 42'],
+  ['Estimation Service', 'Build estimate', 'range, probability, reasons'],
+  ['Database', 'Store estimate', 'status = estimated'],
+];
+async function runEstimate() {
+  UI.errors = {}; UI.banner = null;
+  const payload = orderPayload();
+  const r = await api('POST', '/orders/estimate?compare=true', payload);
+  if (r.status === 422) {
+    for (const d of r.body.error.details) UI.errors[d.field] = d.problem;
+    UI.banner = `<div class="banner bad" role="alert"><b>${esc(r.body.error.message)}</b><span>Each problem is shown next to its field. The API answered 422 and nothing was simulated.</span></div>`;
+    render(); return;
+  }
+  if (r.status === 409) {
+    const d = r.body.error.details;
+    UI.banner = `<div class="banner warn" role="alert"><b>${esc(r.body.error.message)}</b>
+      <ul>${d.map(x => `<li>${esc(LABELS[x.material])}: needed ${x.needed} ${x.unit}, in stock ${x.in_stock}. Next delivery ${fmtW(parseISO(x.next_delivery_date))}.</li>`).join('')}</ul>
+      <div class="actions"><button type="button" class="btn soft" id="swapMat">Choose another material</button><button type="button" class="btn primary" id="allowBackorder">Estimate with backorder</button></div></div>`;
+    render(); return;
+  }
+  UI.form.allow_backorder = false;
+  UI.editingId = r.body.order_id;
+  const o = DB.orders.get(r.body.order_id);
+  UI.est = { id: o.order_id, res: r.body, shown: 0, stage: 0 };
+  UI.commitWd = cal.dateToWd(parseISO(r.body.estimate.most_likely));
+  setView('estimate');
+  animateEstimate();
+}
+function animateEstimate() {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const E = UI.est, total = 200;
+  if (reduce) { E.stage = 6; E.shown = total; renderEstimate($('#page')); return; }
+  let t = 0;
+  const tick = () => {
+    if (VIEW !== 'estimate' || UI.est !== E) return;
+    t++;
+    if (E.stage < 3) { if (t % 6 === 0) E.stage++; }
+    else if (E.stage === 3) { E.shown = Math.min(total, E.shown + 9); if (E.shown >= total) E.stage = 4; }
+    else if (t % 6 === 0) E.stage++;
+    updateEstimateLive();
+    if (E.stage < 6) requestAnimationFrame(tick);
+    else renderEstimate($('#page'));
+  };
+  renderEstimate($('#page'));
+  requestAnimationFrame(tick);
+}
+function pipelineHTML(stage) {
+  return PIPE.map((p, i) => `<div class="step ${i < stage ? 'done' : i === stage ? 'run' : ''}"><small>${i < stage ? '✓ ' : ''}${esc(p[0])}</small><b>${esc(p[1])}</b><span>${i === 3 && stage === 3 ? `${UI.est.shown} / 200 runs` : esc(p[2])}</span></div>`).join('');
+}
+function updateEstimateLive() {
+  const pl = $('#pipeline'); if (pl) pl.innerHTML = pipelineHTML(UI.est.stage);
+  const h = $('#hist'); if (h) h.innerHTML = histSVG();
+}
+function chartW() { const p = $('#page'); return Math.round(Math.max(300, Math.min(1000, (p ? p.clientWidth : 700) - (innerWidth < 820 ? 70 : 110)))); }
+function histSVG() {
+  const E = UI.est, o = DB.orders.get(E.id), days = o._days.slice(0, E.shown);
+  const all = o._days, reqWd = cal.dateToWd(parseISO(o.requested_date));
+  const dmin = Math.min(...all), dmax = Math.max(...all);
+  const lo = Math.max(dmin - 3, Math.min(dmin, reqWd)) - 1, hi = Math.min(dmax + 3, Math.max(dmax, reqWd)) + 1;
+  const W = chartW(), narrow = W < 560, H = narrow ? 230 : 240;
+  const n = hi - lo + 1, padL = 30, padB = 30, padT = 34, cw = (W - padL - 8) / n;
+  const counts = new Array(n).fill(0), full = new Array(n).fill(0);
+  days.forEach(d => counts[d - lo]++); all.forEach(d => full[d - lo]++);
+  const ymax = Math.ceil(Math.max(...full) / 10) * 10 || 10, y = v => padT + (H - padT - padB) * (1 - v / ymax);
+  const cx = wd => padL + (wd - lo) * cw + cw / 2;
+  let g = '';
+  for (let v = 0; v <= ymax; v += ymax / 2) g += `<line x1="${padL}" x2="${W - 8}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${padL - 6}" y="${y(v) + 4}" text-anchor="end" font-size="10.5" fill="var(--faint)">${v}</text>`;
+  const step = cw < 46 ? 2 : 1;
+  counts.forEach((c, i) => {
+    const d = lo + i, x = padL + i * cw + 2, late = d > reqWd;
+    if (c) g += `<rect x="${x}" y="${y(c)}" width="${Math.max(1, cw - 4)}" height="${y(0) - y(c)}" rx="3" fill="${late ? 'var(--risk)' : 'var(--accent)'}" opacity="${late ? 0.8 : 0.92}"/>`;
+    if (i % step === 0) g += `<text x="${cx(d)}" y="${H - padB + 16}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${fmt(wdDate(d))}</text>`;
+  });
+  const vline = (wd, color, label, row) => {
+    const c = Math.min(hi, Math.max(lo, wd)), arrow = wd > hi ? ' →' : wd < lo ? ' ← ' : '';
+    const x = cx(c) + (wd > hi ? cw / 2 - 2 : wd < lo ? -cw / 2 + 2 : 0), right = x > W * 0.62;
+    return `<line x1="${x}" x2="${x}" y1="${row ? 24 : 8}" y2="${y(0)}" stroke="${color}" stroke-width="2" stroke-dasharray="4 3"/><text x="${right ? x - 5 : x + 5}" y="${row ? 32 : 16}" text-anchor="${right ? 'end' : 'start'}" font-size="11" font-weight="600" fill="${color}">${label}${arrow}</text>`;
+  };
+  g += vline(reqWd, 'var(--risk)', `Requested ${fmt(wdDate(reqWd))}`, 0);
+  if (UI.commitWd != null && E.stage >= 6) g += vline(UI.commitWd, 'var(--fg)', `Committed ${fmt(wdDate(UI.commitWd))}`, 1);
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Distribution of simulated completion dates">${g}</svg>`;
+}
+function rangeHTML(est, reqDate) {
+  const e = cal.dateToWd(parseISO(est.earliest)), l = cal.dateToWd(parseISO(est.latest)), m = cal.dateToWd(parseISO(est.most_likely)), r = cal.dateToWd(parseISO(reqDate));
+  const rc = Math.min(l + 4, Math.max(e - 4, r));
+  const lo = Math.min(e, rc) - 0.5, hi = Math.max(l, rc) + 0.5, pos = v => ((v - lo) / (hi - lo)) * 100;
+  return `<div class="range">
+    <div class="range-track">
+      <div class="range-bar"></div>
+      <div class="range-band" style="left:${pos(e)}%;width:${pos(l) - pos(e)}%"></div>
+      <span class="flag" style="left:${Math.min(85, Math.max(15, pos(rc)))}%">Requested: ${fmt(parseISO(reqDate))}</span>
+      <span class="mark rq" style="left:${pos(rc)}%"></span>
+      <span class="mark ml" style="left:${pos(m)}%"></span>
+    </div>
+    <div class="range-labels"><span>Earliest: ${fmt(parseISO(est.earliest))}</span><span class="ml">Most likely: ${fmt(parseISO(est.most_likely))}</span><span>Latest: ${fmt(parseISO(est.latest))}</span></div>
+  </div>`;
+}
+function compareHTML(o) {
+  const c = o._comparison; if (!c) return '';
+  const rows = [['Digital twin', 'Simulation of current state', c.digital_twin, 'var(--accent)'], ['B1', 'Avg. lead time + buffer', c.b1_average_lead_time_plus_buffer, 'var(--b1)'], ['B2', 'Static capacity check', c.b2_static_capacity_check, 'var(--b2)']];
+  const wds = rows.map(r => cal.dateToWd(parseISO(r[2]))), req = cal.dateToWd(parseISO(o.requested_date));
+  const lo = Math.min(...wds, req) - 1, hi = Math.max(...wds, req) + 1, pos = v => ((v - lo) / (hi - lo)) * 100;
+  return `<div class="card"><div class="card-head"><h2>Same order, three methods</h2><span class="muted" style="font-size:13px">FR-17 · the brown line is the requested date</span></div>
+    <div class="cmp">${rows.map((r, i) => `<div class="cmp-row"><div class="lab"><b>${r[0]}</b><span>${r[1]}</span></div><div class="cmp-lane"><span class="cmp-req" style="left:${pos(req)}%"></span><span class="cmp-dot" style="left:${pos(wds[i])}%;background:${r[3]}"></span></div><div class="d">${fmt(parseISO(r[2]))}</div></div>`).join('')}</div>
+    <p class="muted" style="margin:14px 0 0;font-size:13px;max-width:75ch">B1 gives every order the same lead time. B2 checks capacity against the plan but cannot see today's queues or breakdowns. Only the twin starts from the live factory state, which is why its date moves when the line gets busier.</p></div>`;
+}
+function renderEstimate(page) {
+  const E = UI.est; if (!E) { setView('new'); return; }
+  const o = DB.orders.get(E.id), est = o.estimate, done = E.stage >= 6;
+  const pCommit = UI.commitWd != null ? o._days.filter(d => d <= UI.commitWd).length / o._days.length : null;
+  page.innerHTML = `
+    <div class="page-head"><h1>Delivery estimate</h1><p>Order <span class="mono">${esc(o.order_id)}</span> · ${esc(o.customer.name)} · ${o.items.map(it => `${it.quantity}× ${product(it.product_type).label.toLowerCase()}`).join(', ')}</p></div>
+    <div class="pipeline" id="pipeline">${pipelineHTML(E.stage)}</div>
+    <div class="card">
+      <div class="hero">
+        <div class="prob">
+          <div class="big">${done ? Math.round(est.probability_on_requested_date * 100) + '%' : '··'}${done ? `<span class="badge ${est.assessment}">${ASSESS_LABEL[est.assessment]}</span>` : ''}</div>
+          <span class="muted">chance to meet the requested date</span>
+        </div>
+        ${done ? rangeHTML(est, o.requested_date) : '<div class="muted">Simulating the order through panel cutting, edge banding, drilling, CNC, painting and staging…</div>'}
+      </div>
+    </div>
+    <div class="card hist"><div class="card-head"><h2>200 simulated futures</h2><span class="muted" style="font-size:13px">completion date per run</span></div>
+        <div id="hist">${histSVG()}</div>
+        <div class="legend" style="margin-top:8px"><span><i style="background:var(--accent)"></i>finishes by requested date</span><span><i style="background:var(--risk)"></i>finishes after it</span></div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Why this date</h2><span class="muted" style="font-size:13px">days saved if this cause disappeared</span></div>
+        ${done ? (est.reasons.length ? est.reasons.map(r => `<div class="reason"><b>${esc(r.station === 'materials' ? 'Materials' : STATION_NAME[r.station])}</b><span>${esc(r.note)}</span><span class="delta">+${r.effect_days} day${r.effect_days === 1 ? '' : 's'}</span></div>`).join('') : '<p class="muted">No station adds more than a third of a day. The line has room for this order.</p>') : '<p class="muted">Waiting for the simulation…</p>'}
+    </div>
+    ${done ? compareHTML(o) : ''}
+    ${done ? `<div class="card">
+      <div class="card-head"><h2>Commit a date to the customer</h2><span class="muted" style="font-size:13px">The manager chooses; the system records the estimate shown</span></div>
+      <div class="commit">
+        <div class="f"><label for="commitDate">Committed date</label><input id="commitDate" type="date" value="${isoWd(UI.commitWd)}"></div>
+        <div class="p" id="commitP">${pCommitHTML(pCommit)}</div>
+        <div class="actions"><button class="btn soft" id="changeOrder">Change order</button><button class="btn primary" id="confirm">Confirm date</button></div>
+      </div>
+      <div class="meta" style="margin-top:16px"><span>Runs <b>${est.simulation.runs}</b></span><span>Seed <b>${est.simulation.seed}</b></span><span>Factory state <b>${est.simulation.factory_state_time}</b></span><span>Twin time <b>${est.simulation.duration_seconds.toFixed(3)} s</b></span><span>Target (NFR-01) <b>≤ 10 s</b></span></div>
+    </div>` : ''}`;
+  if (!done) return;
+  $('#commitDate').oninput = e => {
+    if (!e.target.value) return;
+    UI.commitWd = cal.dateToWd(parseISO(e.target.value));
+    const p = o._days.filter(d => d <= UI.commitWd).length / o._days.length;
+    $('#commitP').innerHTML = pCommitHTML(p);
+    $('#hist').innerHTML = histSVG();
+  };
+  $('#changeOrder').onclick = () => { UI.form = { customer: { ...o.customer }, requested_date: o.requested_date, allow_backorder: false, items: o.items.map(it => ({ ...it, dimensions_mm: { ...it.dimensions_mm }, options: (it.options || []).slice() })) }; setView('new'); };
+  $('#confirm').onclick = async () => {
+    const r = await api('POST', '/orders', { order_id: o.order_id, committed_date: $('#commitDate').value });
+    if (r.status >= 300) { toast(r.body.error.message); return; }
+    toast(`${o.order_id} confirmed for ${fmtY(parseISO(r.body.committed_date))}`);
+    UI.flash = o.order_id; UI.form = null; UI.editingId = null; UI.est = null;
+    setView('orders');
+  };
+}
+function pCommitHTML(p) {
+  if (p == null) return '';
+  const a = assess(p);
+  return `<b>${Math.round(p * 100)}%</b> of runs finish by this date <span class="badge ${a}" style="margin-left:6px">${ASSESS_LABEL[a]}</span>`;
+}
+
+/* ---------------- Orders ---------------- */
+function outlookOf(o) {
+  if (!o.committed_date || o.status === 'completed' || !o.job) return null;
+  const j = DB.factory.jobs.find(x => x.id === o.job); if (!j) return null;
+  const e = jobOutlook(j, 60, 5);
+  return assess(e.prob(cal.dateToWd(parseISO(o.committed_date))));
+}
+async function renderOrders(page) {
+  page.innerHTML = `<div class="page-head"><h1>Orders</h1><p>Customer orders with requested and committed dates. The outlook re-runs the twin on today's factory state for every open order.</p></div><div class="card"><p class="muted">Loading…</p></div>`;
+  const r = await api('GET', '/orders');
+  if (VIEW !== 'orders') return;
+  const all = r.body.items;
+  const filters = [['all', 'All'], ['draft', 'Drafts'], ['estimated', 'Estimated'], ['confirmed', 'Confirmed'], ['in_production', 'In production'], ['completed', 'Completed']];
+  const draw = () => {
+    const q = UI.search.trim().toLowerCase();
+    const rows = all.filter(o => (UI.filter === 'all' || o.status === UI.filter) && (!q || `${o.order_id} ${o.customer} ${STATUS_LABEL[o.status]}`.toLowerCase().includes(q)));
+    $('#tbody').innerHTML = rows.length ? rows.map(o => {
+      const full = DB.orders.get(o.order_id), out = outlookOf(full);
+      let late = '';
+      if (full.status === 'completed' && full.committed_date) { const d = cal.dateToWd(parseISO(full.completed_date)) - cal.dateToWd(parseISO(full.committed_date)); late = d > 0 ? `<span class="badge late plain">${d} d late</span>` : `<span class="badge on_time plain">on time</span>`; }
+      return `<tr class="click ${UI.flash === o.order_id ? 'flash' : ''}" data-id="${o.order_id}" tabindex="0">
+        <td class="id">${o.order_id}</td><td>${esc(o.customer)}</td>
+        <td>${o.requested_date ? fmtY(parseISO(o.requested_date)) : '—'}</td>
+        <td>${o.committed_date ? fmtY(parseISO(o.committed_date)) : '<span class="muted">—</span>'}</td>
+        <td><span class="badge ${o.status}">${STATUS_LABEL[o.status]}</span></td>
+        <td>${out ? `<span class="badge ${out}">${ASSESS_LABEL[out]}</span>` : late || '<span class="muted">—</span>'}</td></tr>`;
+    }).join('') : `<tr><td colspan="6" class="muted" style="text-align:center;padding:28px">No orders match “${esc(UI.search)}”.</td></tr>`;
+    document.querySelectorAll('tr.click').forEach(tr => { tr.onclick = () => openDetail(tr.dataset.id); tr.onkeydown = e => { if (e.key === 'Enter') openDetail(tr.dataset.id); }; });
+  };
+  page.innerHTML = `
+    <div class="page-head"><h1>Orders</h1><p>Customer orders with requested and committed dates. The outlook column re-runs the twin on today's factory state for every open order.</p></div>
+    <div class="toolbar">
+      <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="search" placeholder="Search by order ID, customer or status" value="${esc(UI.search)}"></label>
+      <div class="seg" id="seg">${filters.map(([k, l]) => `<button data-f="${k}" class="${UI.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Order ID</th><th>Customer</th><th>Requested date</th><th>Committed date</th><th>Status</th><th>Outlook</th></tr></thead><tbody id="tbody"></tbody></table></div>`;
+  $('#search').oninput = e => { UI.search = e.target.value; draw(); };
+  document.querySelectorAll('#seg button').forEach(b => (b.onclick = () => { UI.filter = b.dataset.f; document.querySelectorAll('#seg button').forEach(x => x.classList.toggle('on', x === b)); draw(); }));
+  draw();
+  UI.flash = null;
+}
+function openDetail(id) { UI.detail = id; setView('detail'); }
+async function renderDetail(page) {
+  const r = await api('GET', `/orders/${UI.detail}`);
+  if (VIEW !== 'detail') return;
+  const o = r.body, full = DB.orders.get(o.order_id), est = o.estimate;
+  const job = full.job ? DB.factory.jobs.find(j => j.id === full.job) : null;
+  const steps = ['draft', 'estimated', 'confirmed', 'in_production', 'completed'];
+  const si = steps.indexOf(o.status);
+  const route = job ? STATIONS.map((s, i) => ({ s, need: job.hours[i] > 0, done: i < job.idx || (i === job.idx && false), cur: i === job.idx })) : null;
+  page.innerHTML = `
+    <div class="page-head"><div class="toolbar"><button class="btn ghost" id="back">← Orders</button></div><h1>${esc(o.order_id)}</h1><p>${esc(o.customer.name)}${o.customer.contact ? ' · ' + esc(o.customer.contact) : ''} · created ${esc(o.created_at.slice(0, 10))}</p></div>
+    <div class="pipeline">${steps.map((s, i) => `<div class="step ${i < si ? 'done' : i === si ? 'run' : ''}"><small>${i < si ? '✓ ' : ''}status</small><b>${STATUS_LABEL[s]}</b><span>${s === 'confirmed' && o.committed_date ? fmt(parseISO(o.committed_date)) : s === 'completed' && o.completed_date ? fmt(parseISO(o.completed_date)) : '&nbsp;'}</span></div>`).join('')}</div>
+    <div class="grid2">
+      <div class="card"><div class="card-head"><h2>Dates</h2></div>
+        <div class="fields">
+          <div class="meta"><span>Requested <b>${o.requested_date ? fmtY(parseISO(o.requested_date)) : '—'}</b></span><span>Committed <b>${o.committed_date ? fmtY(parseISO(o.committed_date)) : '—'}</b></span>${o.completed_date ? `<span>Completed <b>${fmtY(parseISO(o.completed_date))}</b></span>` : ''}</div>
+          ${est ? `<div class="eyebrow" style="margin-top:6px">Estimate stored with the order</div>${rangeHTML(est, o.requested_date)}<div class="meta"><span>Probability on requested date <b>${Math.round(est.probability_on_requested_date * 100)}%</b></span><span class="badge ${est.assessment}">${ASSESS_LABEL[est.assessment]}</span></div>` : '<p class="muted">No estimate yet.</p>'}
+        </div>
+      </div>
+      <div class="card"><div class="card-head"><h2>Items</h2></div>
+        ${o.items.map(it => `<div class="reason"><b>${it.quantity}× ${esc(product(it.product_type).label)}</b><span>${it.dimensions_mm.width}×${it.dimensions_mm.height}×${it.dimensions_mm.depth} mm · ${esc(LABELS[it.material])} · ${esc(LABELS[it.finish])}${it.color ? ' ' + esc(it.color) : ''}${(it.options || []).length ? ' · ' + it.options.map(x => LABELS[x]).join(', ') : ''}</span><span></span></div>`).join('')}
+        ${route ? `<div class="eyebrow" style="margin:14px 0 8px">Route on the line</div><div class="chips">${route.filter(x => x.need).map(x => `<span class="badge ${x.cur ? 'in_production' : STATIONS.indexOf(x.s) < job.idx ? 'confirmed' : 'draft'} plain">${x.s.name}${x.cur ? ' · here' : ''}</span>`).join('')}</div>` : ''}
+      </div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Actions</h2><span class="muted" style="font-size:13px">FR-15 · orders can change until production starts</span></div>
+      <div class="actions" style="justify-content:flex-start"><button class="btn primary" id="edit">Edit and re-estimate</button><button class="btn soft" id="raw">Show stored JSON</button></div>
+      <pre class="csv" id="rawJson" hidden>${esc(JSON.stringify(o, null, 2))}</pre>
+    </div>`;
+  $('#back').onclick = () => setView('orders');
+  $('#raw').onclick = () => { const p = $('#rawJson'); p.hidden = !p.hidden; };
+  $('#edit').onclick = async () => {
+    if (o.status === 'in_production' || o.status === 'completed') {
+      const rr = await api('PUT', `/orders/${o.order_id}`, { requested_date: o.requested_date });
+      toast(rr.body.error ? rr.body.error.message : 'Updated'); return;
+    }
+    if (o.status === 'confirmed') {
+      const rr = await api('PUT', `/orders/${o.order_id}`, { requested_date: o.requested_date });
+      if (rr.status >= 300) { toast(rr.body.error.message); return; }
+      DB.factory.jobs = DB.factory.jobs.filter(j => j.id !== full.job); full.job = null;
+    }
+    UI.editingId = o.order_id;
+    UI.form = { customer: { ...o.customer }, requested_date: o.requested_date, allow_backorder: false, items: o.items.map(it => ({ ...it, color: it.color || 'RAL9010', dimensions_mm: { ...it.dimensions_mm }, options: (it.options || []).slice() })) };
+    UI.errors = {}; UI.banner = null; setView('new');
+  };
+}
+
+/* ---------------- Factory status ---------------- */
+async function renderFactory(page) {
+  const r = await api('GET', '/factory/status');
+  if (VIEW !== 'factory') return;
+  const fs = r.body;
+  const jobs = DB.factory.jobs.slice().sort((a, b) => b.idx - a.idx || a.seq - b.seq);
+  const tracked = jobs.filter(j => !j.dealer).length;
+  const rows = jobs.slice(0, 14).map(j => { const e = jobOutlook(j, 40, 3); return `<tr ${j.dealer ? '' : `class="click" data-id="${j.id}" tabindex="0"`}><td class="${j.dealer ? '' : 'id'}">${esc(j.id)}</td><td class="muted">${j.dealer ? 'Dealer network' : esc(DB.orders.get(j.id)?.customer.name || '')}</td><td style="color:${j.idx === PAINT ? 'var(--bneck)' : 'inherit'}">${STATIONS[j.idx].name}${j.readyDay > DB.factory.day ? ' <span class="muted">(waiting)</span>' : ''}</td><td class="r">${Math.round(j.left.reduce((a, b) => a + b, 0) * 10) / 10} h</td><td class="r">${fmtW(wdDate(e.ml))}</td></tr>`; }).join('');
+  const ev = DB.events.slice(0, 6);
+  page.innerHTML = `
+    <div class="page-head"><h1>Factory status</h1><p>Load by station and orders on the line. In this prototype the Factory Emulator plays the real factory: each working day it processes queues, breaks machines at random and writes a status update the twin reads.</p></div>
+    <div class="kpis">
+      <div class="kpi"><span>Bottleneck</span><b>${STATION_NAME[fs.bottleneck]}</b></div>
+      <div class="kpi"><span>Orders on the line</span><b>${fs.orders_in_progress}</b></div>
+      <div class="kpi"><span>Showroom orders</span><b>${tracked}</b></div>
+      <div class="kpi"><span>State as of</span><b>${fmt(today())}</b></div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Station utilisation</h2><span class="eyebrow">work ahead ÷ next ${CAP_HORIZON_DAYS} working days</span></div>
+      <div class="stations">${fs.stations.map(s => `<div class="st ${s.station === fs.bottleneck ? 'bn' : ''}"><div class="st-top"><b>${STATION_NAME[s.station]}${s.station === fs.bottleneck ? '<span class="tag">BOTTLENECK</span>' : ''}</b><span class="pct">${Math.round(s.utilization * 100)}%</span></div><div class="bar"><i style="width:${Math.round(s.utilization * 100)}%"></i></div><div class="st-meta"><span>Queue <b>${s.queue_length}</b></span><span>Work ahead <b>${s.work_ahead_hours} h</b></span><span>Free capacity <b>${s.free_capacity_hours} h</b></span><span>Machines <b>${STATIONS.find(x => x.id === s.station).machines}</b></span></div></div>`).join('')}</div>
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="card-head"><h2>Run the emulator</h2><span class="muted" style="font-size:13px">FR-12</span></div>
+        <p class="muted" style="margin:0 0 14px;max-width:60ch">Advance the simulated factory. Confirmed orders start, move between stations and finish; the next estimate starts from the new state.</p>
+        <div class="actions" style="justify-content:flex-start"><button class="btn primary" id="adv1">Advance 1 working day</button><button class="btn soft" id="adv5">Advance 5 days</button><button class="btn ghost" id="reset">Reset demo</button></div>
+        <div class="feed" style="margin-top:16px">${ev.length ? ev.map(e => `<div class="feed-day"><b>${fmtW(wdDate(e.day))}</b>
+          <span>${e.breakdowns.length ? e.breakdowns.map(b => `${STATION_NAME[b.station]} breakdown, ${b.hours} h lost`).join('; ') : 'No breakdowns'}</span>
+          ${e.started.length ? `<span>Started: ${e.started.join(', ')}</span>` : ''}
+          ${e.done.length ? `<span>Completed: ${e.done.join(', ')}</span>` : ''}
+          <span>${e.completed.length} job${e.completed.length === 1 ? '' : 's'} left the line · ${e.arrivals.length} dealer order${e.arrivals.length === 1 ? '' : 's'} arrived</span></div>`).join('') : '<span class="muted">No emulated days yet.</span>'}</div>
+      </div>
+      <div class="card"><div class="card-head"><h2>Material stock</h2><span class="muted" style="font-size:13px">checked on every estimate</span></div>
+        ${Object.entries(DB.stock).map(([m, s]) => `<div class="reason"><b>${LABELS[m]}</b><span>Next delivery ${fmtW(wdDate(s.next_delivery_day))}</span><span class="num" style="font-weight:600">${s.in_stock} ${s.unit}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Orders in progress</h2><span class="muted" style="font-size:13px">expected finish is the twin's median for each job</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Order ID</th><th>Customer</th><th>Station</th><th class="r">Work left</th><th class="r">Expected finish</th></tr></thead><tbody>${rows}</tbody></table></div>
+      ${jobs.length > 14 ? `<p class="muted" style="margin:10px 0 0;font-size:13px">Showing the 14 most advanced of ${jobs.length} jobs.</p>` : ''}
+    </div>`;
+  const adv = n => { for (let i = 0; i < n; i++) advanceDay(); toast(`Factory clock moved to ${fmtW(today())}`); render(); };
+  $('#adv1').onclick = () => adv(1);
+  $('#adv5').onclick = () => adv(5);
+  $('#reset').onclick = () => { seedDemo(); UI.form = null; UI.editingId = null; UI.est = null; UI.exp = null; toast('Demo reset to the starting factory state'); render(); };
+  document.querySelectorAll('tr.click').forEach(tr => { tr.onclick = () => openDetail(tr.dataset.id); tr.onkeydown = e => { if (e.key === 'Enter') openDetail(tr.dataset.id); }; });
+}
+
+/* ---------------- Experiments ---------------- */
+const SCEN = { low: 0.7, medium: 0.85, high: 0.95 };
+function wilcoxonGreater(d) {
+  /* one-sided exact signed-rank test: H1 says d > 0 (baseline error larger than twin's) */
+  const x = d.filter(v => Math.abs(v) > 1e-12); const n = x.length; if (!n) return 1;
+  const ord = x.map((v, i) => [Math.abs(v), i]).sort((a, b) => a[0] - b[0]);
+  const rank = new Array(n);
+  for (let i = 0; i < n;) { let j = i; while (j + 1 < n && Math.abs(ord[j + 1][0] - ord[i][0]) < 1e-12) j++; for (let k = i; k <= j; k++) rank[ord[k][1]] = (i + j + 2) / 2; i = j + 1; }
+  const r2 = rank.map(r => Math.round(r * 2)); const W = x.reduce((s, v, i) => s + (v > 0 ? r2[i] : 0), 0);
+  const max = r2.reduce((a, b) => a + b, 0); let dist = new Array(max + 1).fill(0); dist[0] = 1;
+  for (const r of r2) { const nd = dist.slice(); for (let s = 0; s + r <= max; s++) if (dist[s]) nd[s + r] += dist[s]; dist = nd; }
+  const tot = 2 ** n; let p = 0; for (let s = W; s <= max; s++) p += dist[s];
+  return p / tot;
+}
+function holm(ps) {
+  const idx = ps.map((p, i) => [p, i]).sort((a, b) => a[0] - b[0]), m = ps.length, out = new Array(m); let run = 0;
+  idx.forEach(([p, i], k) => { run = Math.max(run, Math.min(1, (m - k) * p)); out[i] = run; });
+  return out;
+}
+async function runExperiment(cfg) {
+  UI.expRunning = true;
+  const scen = [];
+  for (const l of cfg.load === 'all' ? ['low', 'medium', 'high'] : [cfg.load]) for (const d of cfg.dist === 'all' ? ['normal', 'high'] : [cfg.dist]) scen.push([l, d]);
+  const totalWork = scen.length * cfg.reps; let doneWork = 0;
+  const results = [], csv = ['scenario,replication,order_id,method,estimated_date,actual_date,abs_error_days,on_time,estimation_seconds'];
+  logCall('CALL', `experiment_runner --seed ${cfg.seed} --reps ${cfg.reps} --orders ${cfg.orders}`, 200, cfg, { scenarios: scen.map(s => s.join('-')) }, 'Researcher starts the Experiment Runner');
+  for (const [lv, ds] of scen) {
+    const name = `${lv}-${ds}`, E = EMU_PARAMS[ds], u = SCEN[lv];
+    const hr = mulberry32(cfg.seed * 7 + lv.length * 31 + ds.length);
+    const hist = [];
+    for (let i = 0; i < 40; i++) { const F = generateFactory(hr, u); const it = [randomItem(hr)]; hist.push(emulateOrder({ day: 0, jobs: F.jobs }, orderHours(it), needsDrying(it), hr, E)); }
+    const histMean = hist.reduce((a, b) => a + b, 0) / hist.length;
+    const reps = [];
+    for (let rep = 1; rep <= cfg.reps; rep++) {
+      const rng = mulberry32(cfg.seed * 1000 + rep * 17 + lv.length * 3 + ds.length);
+      const emuRng = mulberry32(cfg.seed * 99991 + rep * 7919 + lv.length * 13 + ds.length);
+      const acc = { twin: [], B1: [], B2: [] }, ms = [];
+      for (let k = 0; k < cfg.orders; k++) {
+        const F = generateFactory(rng, u * (0.95 + 0.1 * rng()));
+        const st = { day: 0, jobs: F.jobs }, it = [randomItem(rng)], h = orderHours(it), dr = needsDrying(it);
+        const t0 = performance.now();
+        const tw = twinEstimate(st, h, { runs: cfg.runs, seed: rep * 1000 + k, drying: dr, disturbance: ds }).days.sort((a, b) => a - b);
+        ms.push(performance.now() - t0);
+        const est = { twin: quantile(tw, 0.5), B1: baselineB1(st, histMean), B2: baselineB2(st, h, dr) };
+        const actual = emulateOrder(st, h, dr, emuRng, E);
+        for (const m of ['twin', 'B1', 'B2']) {
+          acc[m].push(est[m] - actual);
+          if (csv.length < 4000) csv.push(`${name},${rep},ORD-${String(k + 1).padStart(4, '0')},${m},${isoWd(est[m])},${isoWd(actual)},${Math.abs(est[m] - actual)},${actual <= est[m]},${m === 'twin' ? (ms[ms.length - 1] / 1000).toFixed(4) : '0.0000'}`);
+        }
+      }
+      const sum = {};
+      for (const m of ['twin', 'B1', 'B2']) { const e = acc[m]; sum[m] = { mae: e.reduce((a, b) => a + Math.abs(b), 0) / e.length, bias: e.reduce((a, b) => a + b, 0) / e.length, ontime: e.filter(x => x >= 0).length / e.length }; }
+      sum.ms = ms.reduce((a, b) => a + b, 0) / ms.length;
+      reps.push(sum);
+      doneWork++;
+      const pr = $('#expProg'); if (pr) pr.style.width = `${(doneWork / totalWork) * 100}%`;
+      const pt = $('#expProgText'); if (pt) pt.textContent = `Scenario ${name}, replication ${rep} of ${cfg.reps}`;
+      await new Promise(r => setTimeout(r, 0));
+    }
+    const mean = (m, k) => reps.reduce((a, r) => a + r[m][k], 0) / reps.length;
+    const sd = (m, k) => { const mu = mean(m, k); return Math.sqrt(reps.reduce((a, r) => a + (r[m][k] - mu) ** 2, 0) / Math.max(1, reps.length - 1)); };
+    const res = { name, lv, ds, methods: {}, ms: reps.reduce((a, r) => a + r.ms, 0) / reps.length };
+    for (const m of ['twin', 'B1', 'B2']) res.methods[m] = { mae: mean(m, 'mae'), maeSd: sd(m, 'mae'), bias: mean(m, 'bias'), ontime: mean(m, 'ontime') };
+    res.p = { B1: wilcoxonGreater(reps.map(r => r.B1.mae - r.twin.mae)), B2: wilcoxonGreater(reps.map(r => r.B2.mae - r.twin.mae)) };
+    results.push(res);
+  }
+  const adj = holm(results.flatMap(r => [r.p.B1, r.p.B2]));
+  results.forEach((r, i) => { r.adj = { B1: adj[2 * i], B2: adj[2 * i + 1] }; r.supported = r.adj.B1 < 0.05 && r.adj.B2 < 0.05; });
+  UI.exp = { cfg, results, csv };
+  UI.expRunning = false;
+  logCall('CALL', 'experiment_runner → results/summary.csv', 200, null, { scenarios: results.map(r => ({ scenario: r.name, mae: Object.fromEntries(Object.entries(r.methods).map(([k, v]) => [k, +v.mae.toFixed(2)])), holm_p: { twin_vs_B1: +r.adj.B1.toFixed(4), twin_vs_B2: +r.adj.B2.toFixed(4) } })) }, 'Experiment Runner writes results');
+  render();
+}
+function maeChart(results) {
+  const W = chartW(), H = 260, padL = 36, padB = 40, padT = 22;
+  const max = Math.max(...results.flatMap(r => ['twin', 'B1', 'B2'].map(m => r.methods[m].mae)));
+  const ymax = Math.ceil(max) || 1, y = v => padT + (H - padT - padB) * (1 - v / ymax);
+  const gw = (W - padL - 8) / results.length, bw = Math.min(40, (gw - 18) / 3);
+  const col = { twin: 'var(--accent)', B1: 'var(--b1)', B2: 'var(--b2)' };
+  let g = '';
+  for (let v = 0; v <= ymax; v += ymax > 4 ? 2 : 1) g += `<line x1="${padL}" x2="${W - 8}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${padL - 6}" y="${y(v) + 4}" text-anchor="end" font-size="10.5" fill="var(--faint)">${v}</text>`;
+  results.forEach((r, i) => {
+    const x0 = padL + i * gw + (gw - bw * 3 - 8) / 2;
+    ['twin', 'B1', 'B2'].forEach((m, k) => {
+      const v = r.methods[m].mae, x = x0 + k * (bw + 4);
+      g += `<rect x="${x}" y="${y(v)}" width="${bw}" height="${y(0) - y(v)}" rx="3" fill="${col[m]}"/>`;
+      if (bw >= 18) g += `<text x="${x + bw / 2}" y="${y(v) - 4}" text-anchor="middle" font-size="11" fill="var(--muted)">${v.toFixed(1)}</text>`;
+    });
+    g += `<text x="${padL + i * gw + gw / 2}" y="${H - padB + 16}" text-anchor="middle" font-size="11" fill="var(--fg)" font-weight="600">${r.lv}</text><text x="${padL + i * gw + gw / 2}" y="${H - padB + 30}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${r.ds}</text>`;
+  });
+  g += `<text x="${padL}" y="11" font-size="10.5" fill="var(--faint)">MAE, working days · load / disturbances</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Mean absolute error by scenario and method">${g}</svg>`;
+}
+function renderExperiments(page) {
+  const cfg = UI.exp?.cfg || { load: 'all', dist: 'all', reps: 10, orders: 25, runs: 100, seed: 2026 };
+  const sel = (id, opts, cur) => `<select id="${id}">${opts.map(([v, l]) => `<option value="${v}" ${String(v) === String(cur) ? 'selected' : ''}>${l}</option>`).join('')}</select>`;
+  const ex = UI.exp;
+  page.innerHTML = `
+    <div class="page-head"><h1>Experiments</h1><p>The research question: does the twin give more accurate delivery dates than B1 and B2? The runner sends the same synthetic orders to all three methods, asks the independent emulator for the actual completion date and compares.</p></div>
+    <div class="card">
+      <div class="exp-controls">
+        <div class="f"><label for="x-load">Load level</label>${sel('x-load', [['all', 'All three'], ['low', 'Low (70%)'], ['medium', 'Medium (85%)'], ['high', 'High (95%)']], cfg.load)}</div>
+        <div class="f"><label for="x-dist">Disturbances</label>${sel('x-dist', [['all', 'Both'], ['normal', 'Normal'], ['high', 'High']], cfg.dist)}</div>
+        <div class="f"><label for="x-reps">Replications × orders</label>${sel('x-reps', [['10x25', '10 × 25'], ['15x30', '15 × 30'], ['30x40', '30 × 40 (slower)']], `${cfg.reps}x${cfg.orders}`)}</div>
+        <div class="f"><label for="x-seed">Random seed</label><input id="x-seed" type="number" value="${cfg.seed}"></div>
+        <button class="btn primary" id="x-run" ${UI.expRunning ? 'disabled' : ''}>Run experiment</button>
+      </div>
+      <div style="margin-top:16px;display:grid;gap:6px" ${UI.expRunning ? '' : 'hidden'} id="expProgWrap"><div class="progress"><i id="expProg"></i></div><span class="muted" style="font-size:12.5px" id="expProgText">Starting…</span></div>
+      <p class="muted" style="margin:14px 0 0;font-size:12.5px;max-width:90ch">Scaled down to run in the browser (the plan uses 30 replications × ~200 orders per scenario). The twin uses 100 runs per order here. The same seed always gives the same table (NFR-04).</p>
+    </div>
+    ${ex ? `
+    <div class="card hist"><div class="card-head"><h2>Mean absolute error</h2><span class="muted" style="font-size:13px">lower is better</span></div>${maeChart(ex.results)}
+        <div class="legend" style="margin-top:8px"><span><i style="background:var(--accent)"></i>Digital twin</span><span><i style="background:var(--b1)"></i>B1 history + buffer</span><span><i style="background:var(--b2)"></i>B2 static capacity</span></div></div>
+    <div class="card"><div class="card-head"><h2>Hypothesis H1</h2><span class="muted" style="font-size:13px">Wilcoxon signed-rank, Holm-corrected</span></div>
+        <p class="muted" style="margin:0 0 6px;font-size:13px">The twin's MAE is lower than both baselines. Supported in a scenario when both adjusted p-values are below 0.05; overall when supported in at least ${Math.ceil(ex.results.length * 4 / 6)} of ${ex.results.length}.</p>
+        ${ex.results.map(r => `<div class="reason"><b>${r.lv} · ${r.ds}</b><span class="num">p vs B1 ${fmtP(r.adj.B1)} · vs B2 ${fmtP(r.adj.B2)}</span><span class="verdict ${r.supported ? 'yes' : 'no'}">${r.supported ? 'Supported' : 'Not supported'}</span></div>`).join('')}
+        <div class="reason"><b>Overall</b><span></span><span class="verdict ${ex.results.filter(r => r.supported).length >= Math.ceil(ex.results.length * 4 / 6) ? 'yes' : 'no'}">${ex.results.filter(r => r.supported).length} of ${ex.results.length} scenarios</span></div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Method</th><th class="r">MAE, days</th><th class="r">SD</th><th class="r">Bias, days</th><th class="r">On-time share</th><th class="r">Estimate time</th></tr></thead><tbody>
+      ${ex.results.map(r => { const best = Math.min(...['twin', 'B1', 'B2'].map(m => r.methods[m].mae)); return ['twin', 'B1', 'B2'].map((m, k) => `<tr><td>${k === 0 ? `<b>${r.lv}</b> · ${r.ds}` : ''}</td><td>${m === 'twin' ? 'Digital twin' : m}</td><td class="r ${r.methods[m].mae === best ? 'best' : ''}">${r.methods[m].mae.toFixed(2)}</td><td class="r muted">${r.methods[m].maeSd.toFixed(2)}</td><td class="r">${r.methods[m].bias >= 0 ? '+' : ''}${r.methods[m].bias.toFixed(2)}</td><td class="r">${Math.round(r.methods[m].ontime * 100)}%</td><td class="r muted">${m === 'twin' ? r.ms.toFixed(1) + ' ms' : '≈ 0'}</td></tr>`).join(''); }).join('')}
+    </tbody></table></div>
+    <p class="muted" style="margin:0;font-size:13px;max-width:90ch">Bias is estimate minus actual: negative means the method promised too early. On-time share counts orders that the emulator finished on or before the estimated date; the twin's estimate is its median, so it sits near the middle by design, while B1's buffer trades accuracy for a later, safer date.</p>
+    <div class="card"><div class="card-head"><h2>results/orders.csv</h2><button class="btn ghost" id="copyCsv">Copy CSV</button></div><pre class="csv" id="csvPre">${esc(ex.csv.slice(0, 13).join('\n'))}\n… ${ex.csv.length - 1} rows</pre></div>` : `
+    <div class="card"><p class="muted" style="margin:0">Press <b>Run experiment</b>. The default runs all 6 scenarios (3 load levels × 2 disturbance settings) and takes a few seconds.</p></div>`}`;
+  $('#x-run').onclick = () => {
+    const [reps, orders] = $('#x-reps').value.split('x').map(Number);
+    const c = { load: $('#x-load').value, dist: $('#x-dist').value, reps, orders, runs: 100, seed: Number($('#x-seed').value) || 2026 };
+    UI.expRunning = true; render(); runExperiment(c);
+  };
+  const cp = $('#copyCsv');
+  if (cp) cp.onclick = () => { const text = ex.csv.join('\n'); navigator.clipboard.writeText(text).then(() => toast(`Copied ${ex.csv.length - 1} rows`), () => { const pre = $('#csvPre'); pre.textContent = text; const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Selected — press Ctrl+C to copy'); }); };
+}
+const fmtP = p => (p < 0.001 ? '< 0.001' : p.toFixed(3));
+
+/* ---------------- boot ---------------- */
+let _rz; addEventListener('resize', () => { clearTimeout(_rz); _rz = setTimeout(() => { if (VIEW === 'estimate' && UI.est && UI.est.stage >= 6) { const h = $('#hist'); if (h) h.innerHTML = histSVG(); } }, 150); });
+seedDemo();
+document.querySelectorAll('[data-view]').forEach(b => (b.onclick = () => { if (b.dataset.view === 'new' && VIEW !== 'new' && !UI.est) { /* keep form */ } setView(b.dataset.view); }));
+$('#logBtn').onclick = () => setLog(!UI.logOpen);
+$('#logClose').onclick = () => setLog(false);
+if (matchMedia('(max-width: 1280px)').matches) setLog(false);
+api('GET', '/catalog/products');
+const start = (location.hash || '').slice(1);
+setView(['new', 'orders', 'factory', 'experiments'].includes(start) ? start : 'new');
+
+</script>
+
+</body>
+</html>
